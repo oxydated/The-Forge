@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.33214.272
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 16.0.0.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{21A6980D-04AA-430D-BE3D-74F151226C8B}"
 EndProject
@@ -185,6 +185,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BunyTool", "..\..\..\Common
 		{F4BE7E97-8876-4A34-834F-4BC918020B57} = {F4BE7E97-8876-4A34-834F-4BC918020B57}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "37_Transformations", "37_Transformations.vcxproj", "{92429F3A-3940-490E-8DF6-0A51496819EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -315,6 +317,10 @@ Global
 		{ADA72694-302E-45F5-AFCA-BB7C56751EEF}.Debug|x64.Build.0 = Debug|x64
 		{ADA72694-302E-45F5-AFCA-BB7C56751EEF}.Release|x64.ActiveCfg = Release|x64
 		{ADA72694-302E-45F5-AFCA-BB7C56751EEF}.Release|x64.Build.0 = Release|x64
+		{92429F3A-3940-490E-8DF6-0A51496819EA}.Debug|x64.ActiveCfg = Debug|x64
+		{92429F3A-3940-490E-8DF6-0A51496819EA}.Debug|x64.Build.0 = Debug|x64
+		{92429F3A-3940-490E-8DF6-0A51496819EA}.Release|x64.ActiveCfg = Release|x64
+		{92429F3A-3940-490E-8DF6-0A51496819EA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -350,6 +356,7 @@ Global
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052} = {21A6980D-04AA-430D-BE3D-74F151226C8B}
 		{F4BE7E97-8876-4A34-834F-4BC918020B57} = {21A6980D-04AA-430D-BE3D-74F151226C8B}
 		{ADA72694-302E-45F5-AFCA-BB7C56751EEF} = {21A6980D-04AA-430D-BE3D-74F151226C8B}
+		{92429F3A-3940-490E-8DF6-0A51496819EA} = {6CF62059-3AC3-43CD-A29E-2F1E01EA4115}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {948F21A0-5B36-35C9-B219-88B1DAC0D0C2}
