@@ -4,6 +4,9 @@
     <ClCompile Include="..\src\37_Transformations\37_Transformations.cpp">
       <Filter>src\37_Transformations</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\37_Transformations\CastleApp.cpp">
+      <Filter>src\37_Transformations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.frag.fsl">
@@ -61,5 +64,31 @@
     <Filter Include="src\37_Transformations\Shaders\FSL">
       <UniqueIdentifier>{36123f4b-229e-4fe2-9aec-e3a9a7c643b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{f83517f4-8836-4bb8-a63f-b83a2bbeedf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\37_Transformations\headers">
+      <UniqueIdentifier>{cde60d6b-3785-4c4c-9296-8a614900204f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\37_Transformations\CastleApp.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\Pipeline.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\CmdRing.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\CmdRingElement.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\Command.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\GPUQueue.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

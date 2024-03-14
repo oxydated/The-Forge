@@ -65,17 +65,17 @@ struct PlanetInfoStruct
     float mMorphingSpeed; // Speed of morphing betwee cube and sphere
 };
 
-struct UniformBlock
-{
-    CameraMatrix mProjectView;
-    mat4         mToWorldMat[MAX_PLANETS];
-    vec4         mColor[MAX_PLANETS];
-    float        mGeometryWeight[MAX_PLANETS][4];
-
-    // Point Light Information
-    vec3 mLightPosition;
-    vec3 mLightColor;
-};
+//struct UniformBlock
+//{
+//    CameraMatrix mProjectView;
+//    mat4         mToWorldMat[MAX_PLANETS];
+//    vec4         mColor[MAX_PLANETS];
+//    float        mGeometryWeight[MAX_PLANETS][4];
+//
+//    // Point Light Information
+//    vec3 mLightPosition;
+//    vec3 mLightColor;
+//};
 
 struct UniformBlockSky
 {
@@ -99,13 +99,13 @@ SwapChain*    pSwapChain = NULL;
 RenderTarget* pDepthBuffer = NULL;
 Semaphore*    pImageAcquiredSemaphore = NULL;
 
-Shader*      pSphereShader = NULL;
-Buffer*      pSphereVertexBuffer = NULL;
-Buffer*      pSphereIndexBuffer = NULL;
-uint32_t     gSphereIndexCount = 0;
-Pipeline*    pSpherePipeline = NULL;
-VertexLayout gSphereVertexLayout = {};
-uint32_t     gSphereLayoutType = 0;
+//Shader*      pSphereShader = NULL;
+//Buffer*      pSphereVertexBuffer = NULL;
+//Buffer*      pSphereIndexBuffer = NULL;
+//uint32_t     gSphereIndexCount = 0;
+//Pipeline*    pSpherePipeline = NULL;
+//VertexLayout gSphereVertexLayout = {};
+//uint32_t     gSphereLayoutType = 0;
 
 Shader*        pSkyBoxDrawShader = NULL;
 Buffer*        pSkyBoxVertexBuffer = NULL;
@@ -116,16 +116,16 @@ Texture*       pSkyBoxTextures[6];
 DescriptorSet* pDescriptorSetTexture = { NULL };
 DescriptorSet* pDescriptorSetUniforms = { NULL };
 
-Buffer* pProjViewUniformBuffer[gDataBufferCount] = { NULL };
+//Buffer* pProjViewUniformBuffer[gDataBufferCount] = { NULL };
 Buffer* pSkyboxUniformBuffer[gDataBufferCount] = { NULL };
 
 uint32_t     gFrameIndex = 0;
 ProfileToken gGpuProfileToken = PROFILE_INVALID_TOKEN;
 
 int              gNumberOfSpherePoints;
-UniformBlock     gUniformData;
+//UniformBlock     gUniformData;
 UniformBlockSky  gUniformDataSky;
-PlanetInfoStruct gPlanetInfoData[gNumPlanets];
+//PlanetInfoStruct gPlanetInfoData[gNumPlanets];
 
 ICameraController* pCameraController = NULL;
 
@@ -244,7 +244,7 @@ static void compute_normal(const float* src, float* dst)
 
 static void generate_complex_mesh()
 {
-    gSphereVertexLayout = {};
+    //gSphereVertexLayout = {};
 
 // number of vertices on a quad side, must be >= 2
 #define DETAIL_LEVEL 64
@@ -360,94 +360,94 @@ static void generate_complex_mesh()
 
 #undef DETAIL_LEVEL
 
-    void*    bufferData = nullptr;
-    uint32_t vertexCount = sizeof(verts) / 12;
-    size_t   bufferSize;
+    //void*    bufferData = nullptr;
+    //uint32_t vertexCount = sizeof(verts) / 12;
+    //size_t   bufferSize;
 
-    gSphereVertexLayout.mBindingCount = 1;
+    //gSphereVertexLayout.mBindingCount = 1;
 
-    switch (gSphereLayoutType)
-    {
-    default:
-    case 0:
-    {
-        //  0-12 sq positions,
-        // 12-16 sq colors
-        // 16-28 sq normals
-        // 28-32 sp colors
-        // 32-44 sp positions + sp normals
+    //switch (gSphereLayoutType)
+    //{
+    //default:
+    //case 0:
+    //{
+    //    //  0-12 sq positions,
+    //    // 12-16 sq colors
+    //    // 16-28 sq normals
+    //    // 28-32 sp colors
+    //    // 32-44 sp positions + sp normals
 
-        gSphereVertexLayout.mBindings[0].mStride = 44;
-        size_t vsize = vertexCount * gSphereVertexLayout.mBindings[0].mStride;
-        bufferSize = vsize;
-        bufferData = tf_calloc(1, bufferSize);
+    //    gSphereVertexLayout.mBindings[0].mStride = 44;
+    //    size_t vsize = vertexCount * gSphereVertexLayout.mBindings[0].mStride;
+    //    bufferSize = vsize;
+    //    bufferData = tf_calloc(1, bufferSize);
 
-        add_attribute(&gSphereVertexLayout, SEMANTIC_POSITION, TinyImageFormat_R32G32B32_SFLOAT, 0);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_NORMAL, TinyImageFormat_R32G32B32_SFLOAT, 16);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD1, TinyImageFormat_R32G32B32_SFLOAT, 32);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD3, TinyImageFormat_R32G32B32_SFLOAT, 32);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD0, TinyImageFormat_R8G8B8A8_UNORM, 12);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD2, TinyImageFormat_R8G8B8A8_UNORM, 28);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_POSITION, TinyImageFormat_R32G32B32_SFLOAT, 0);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_NORMAL, TinyImageFormat_R32G32B32_SFLOAT, 16);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD1, TinyImageFormat_R32G32B32_SFLOAT, 32);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD3, TinyImageFormat_R32G32B32_SFLOAT, 32);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD0, TinyImageFormat_R8G8B8A8_UNORM, 12);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD2, TinyImageFormat_R8G8B8A8_UNORM, 28);
 
-        copy_attribute(&gSphereVertexLayout, bufferData, 0, 12, vertexCount, verts);
-        copy_attribute(&gSphereVertexLayout, bufferData, 12, 3, vertexCount, sqColors);
-        copy_attribute(&gSphereVertexLayout, bufferData, 16, 12, vertexCount, sqNormals);
-        copy_attribute(&gSphereVertexLayout, bufferData, 28, 3, vertexCount, spColors);
-        copy_attribute(&gSphereVertexLayout, bufferData, 32, 12, vertexCount, sphNormals);
-    }
-    break;
-    case 1:
-    {
-        //  0-12 sq positions,
-        // 16-28 sq normals
-        // 32-34 sq colors
-        // 36-40 sp colors
-        // 48-62 sp positions
-        // 64-76 sp normals
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 0, 12, vertexCount, verts);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 12, 3, vertexCount, sqColors);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 16, 12, vertexCount, sqNormals);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 28, 3, vertexCount, spColors);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 32, 12, vertexCount, sphNormals);
+    //}
+    //break;
+    //case 1:
+    //{
+    //    //  0-12 sq positions,
+    //    // 16-28 sq normals
+    //    // 32-34 sq colors
+    //    // 36-40 sp colors
+    //    // 48-62 sp positions
+    //    // 64-76 sp normals
 
-        gSphereVertexLayout.mBindings[0].mStride = 80;
-        size_t vsize = vertexCount * gSphereVertexLayout.mBindings[0].mStride;
-        bufferSize = vsize;
-        bufferData = tf_calloc(1, bufferSize);
+    //    gSphereVertexLayout.mBindings[0].mStride = 80;
+    //    size_t vsize = vertexCount * gSphereVertexLayout.mBindings[0].mStride;
+    //    bufferSize = vsize;
+    //    bufferData = tf_calloc(1, bufferSize);
 
-        add_attribute(&gSphereVertexLayout, SEMANTIC_POSITION, TinyImageFormat_R32G32B32_SFLOAT, 0);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_NORMAL, TinyImageFormat_R32G32B32_SFLOAT, 16);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD1, TinyImageFormat_R32G32B32_SFLOAT, 48);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD3, TinyImageFormat_R32G32B32_SFLOAT, 64);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD0, TinyImageFormat_R8G8B8A8_UNORM, 32);
-        add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD2, TinyImageFormat_R8G8B8A8_UNORM, 36);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_POSITION, TinyImageFormat_R32G32B32_SFLOAT, 0);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_NORMAL, TinyImageFormat_R32G32B32_SFLOAT, 16);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD1, TinyImageFormat_R32G32B32_SFLOAT, 48);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD3, TinyImageFormat_R32G32B32_SFLOAT, 64);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD0, TinyImageFormat_R8G8B8A8_UNORM, 32);
+    //    add_attribute(&gSphereVertexLayout, SEMANTIC_TEXCOORD2, TinyImageFormat_R8G8B8A8_UNORM, 36);
 
-        copy_attribute(&gSphereVertexLayout, bufferData, 0, 12, vertexCount, verts);
-        copy_attribute(&gSphereVertexLayout, bufferData, 16, 12, vertexCount, sqNormals);
-        copy_attribute(&gSphereVertexLayout, bufferData, 36, 3, vertexCount, spColors);
-        copy_attribute(&gSphereVertexLayout, bufferData, 32, 3, vertexCount, sqColors);
-        copy_attribute(&gSphereVertexLayout, bufferData, 48, 12, vertexCount, sphNormals);
-        copy_attribute(&gSphereVertexLayout, bufferData, 64, 12, vertexCount, sphNormals);
-    }
-    break;
-    }
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 0, 12, vertexCount, verts);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 16, 12, vertexCount, sqNormals);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 36, 3, vertexCount, spColors);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 32, 3, vertexCount, sqColors);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 48, 12, vertexCount, sphNormals);
+    //    copy_attribute(&gSphereVertexLayout, bufferData, 64, 12, vertexCount, sphNormals);
+    //}
+    //break;
+    //}
 
-    gSphereIndexCount = sizeof(indices) / sizeof(uint16_t);
+    //gSphereIndexCount = sizeof(indices) / sizeof(uint16_t);
 
-    BufferLoadDesc sphereVbDesc = {};
-    sphereVbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_VERTEX_BUFFER;
-    sphereVbDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_GPU_ONLY;
-    sphereVbDesc.mDesc.mSize = bufferSize;
-    sphereVbDesc.pData = bufferData;
-    sphereVbDesc.ppBuffer = &pSphereVertexBuffer;
-    addResource(&sphereVbDesc, nullptr);
+    //BufferLoadDesc sphereVbDesc = {};
+    //sphereVbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_VERTEX_BUFFER;
+    //sphereVbDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_GPU_ONLY;
+    //sphereVbDesc.mDesc.mSize = bufferSize;
+    //sphereVbDesc.pData = bufferData;
+    //sphereVbDesc.ppBuffer = &pSphereVertexBuffer;
+    //addResource(&sphereVbDesc, nullptr);
 
-    BufferLoadDesc sphereIbDesc = {};
-    sphereIbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_INDEX_BUFFER;
-    sphereIbDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_GPU_ONLY;
-    sphereIbDesc.mDesc.mSize = sizeof(indices);
-    sphereIbDesc.pData = indices;
-    sphereIbDesc.ppBuffer = &pSphereIndexBuffer;
-    addResource(&sphereIbDesc, nullptr);
+    //BufferLoadDesc sphereIbDesc = {};
+    //sphereIbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_INDEX_BUFFER;
+    //sphereIbDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_GPU_ONLY;
+    //sphereIbDesc.mDesc.mSize = sizeof(indices);
+    //sphereIbDesc.pData = indices;
+    //sphereIbDesc.ppBuffer = &pSphereIndexBuffer;
+    //addResource(&sphereIbDesc, nullptr);
 
     waitForAllResourceLoads();
 
-    tf_free(bufferData);
+    //tf_free(bufferData);
 }
 
 class Transformations: public IApp
@@ -535,10 +535,10 @@ public:
         ubDesc.pData = NULL;
         for (uint32_t i = 0; i < gDataBufferCount; ++i)
         {
-            ubDesc.mDesc.pName = "ProjViewUniformBuffer";
-            ubDesc.mDesc.mSize = sizeof(UniformBlock);
-            ubDesc.ppBuffer = &pProjViewUniformBuffer[i];
-            addResource(&ubDesc, NULL);
+            //ubDesc.mDesc.pName = "ProjViewUniformBuffer";
+            //ubDesc.mDesc.mSize = sizeof(UniformBlock);
+            //ubDesc.ppBuffer = &pProjViewUniformBuffer[i];
+            //addResource(&ubDesc, NULL);
             ubDesc.mDesc.pName = "SkyboxUniformBuffer";
             ubDesc.mDesc.mSize = sizeof(UniformBlockSky);
             ubDesc.ppBuffer = &pSkyboxUniformBuffer[i];
@@ -583,13 +583,13 @@ public:
         guiDesc.mStartPosition = vec2(mSettings.mWidth * 0.01f, mSettings.mHeight * 0.2f);
         uiCreateComponent(GetName(), &guiDesc, &pGuiWindow);
 
-        SliderUintWidget vertexLayoutWidget;
-        vertexLayoutWidget.mMin = 0;
-        vertexLayoutWidget.mMax = 1;
-        vertexLayoutWidget.mStep = 1;
-        vertexLayoutWidget.pData = &gSphereLayoutType;
-        UIWidget* pVLw = uiCreateComponentWidget(pGuiWindow, "Vertex Layout", &vertexLayoutWidget, WIDGET_TYPE_SLIDER_UINT);
-        uiSetWidgetOnEditedCallback(pVLw, nullptr, reloadRequest);
+        //SliderUintWidget vertexLayoutWidget;
+        //vertexLayoutWidget.mMin = 0;
+        //vertexLayoutWidget.mMax = 1;
+        //vertexLayoutWidget.mStep = 1;
+        //vertexLayoutWidget.pData = &gSphereLayoutType;
+        //UIWidget* pVLw = uiCreateComponentWidget(pGuiWindow, "Vertex Layout", &vertexLayoutWidget, WIDGET_TYPE_SLIDER_UINT);
+        //uiSetWidgetOnEditedCallback(pVLw, nullptr, reloadRequest);
 
         if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
         {
@@ -619,114 +619,114 @@ public:
 
         // Setup planets (Rotation speeds are relative to Earth's, some values randomly given)
         // Sun
-        gPlanetInfoData[0].mParentIndex = 0;
-        gPlanetInfoData[0].mYOrbitSpeed = 0; // Earth years for one orbit
-        gPlanetInfoData[0].mZOrbitSpeed = 0;
-        gPlanetInfoData[0].mRotationSpeed = 24.0f; // Earth days for one rotation
-        gPlanetInfoData[0].mTranslationMat = mat4::identity();
-        gPlanetInfoData[0].mScaleMat = mat4::scale(vec3(10.0f));
-        gPlanetInfoData[0].mColor = vec4(0.97f, 0.38f, 0.09f, 0.0f);
-        gPlanetInfoData[0].mMorphingSpeed = 0.2f;
+        //gPlanetInfoData[0].mParentIndex = 0;
+        //gPlanetInfoData[0].mYOrbitSpeed = 0; // Earth years for one orbit
+        //gPlanetInfoData[0].mZOrbitSpeed = 0;
+        //gPlanetInfoData[0].mRotationSpeed = 24.0f; // Earth days for one rotation
+        //gPlanetInfoData[0].mTranslationMat = mat4::identity();
+        //gPlanetInfoData[0].mScaleMat = mat4::scale(vec3(10.0f));
+        //gPlanetInfoData[0].mColor = vec4(0.97f, 0.38f, 0.09f, 0.0f);
+        //gPlanetInfoData[0].mMorphingSpeed = 0.2f;
 
-        // Mercury
-        gPlanetInfoData[1].mParentIndex = 0;
-        gPlanetInfoData[1].mYOrbitSpeed = 0.5f;
-        gPlanetInfoData[1].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[1].mRotationSpeed = 58.7f;
-        gPlanetInfoData[1].mTranslationMat = mat4::translation(vec3(10.0f, 0, 0));
-        gPlanetInfoData[1].mScaleMat = mat4::scale(vec3(1.0f));
-        gPlanetInfoData[1].mColor = vec4(0.45f, 0.07f, 0.006f, 1.0f);
-        gPlanetInfoData[1].mMorphingSpeed = 5;
+        //// Mercury
+        //gPlanetInfoData[1].mParentIndex = 0;
+        //gPlanetInfoData[1].mYOrbitSpeed = 0.5f;
+        //gPlanetInfoData[1].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[1].mRotationSpeed = 58.7f;
+        //gPlanetInfoData[1].mTranslationMat = mat4::translation(vec3(10.0f, 0, 0));
+        //gPlanetInfoData[1].mScaleMat = mat4::scale(vec3(1.0f));
+        //gPlanetInfoData[1].mColor = vec4(0.45f, 0.07f, 0.006f, 1.0f);
+        //gPlanetInfoData[1].mMorphingSpeed = 5;
 
-        // Venus
-        gPlanetInfoData[2].mParentIndex = 0;
-        gPlanetInfoData[2].mYOrbitSpeed = 0.8f;
-        gPlanetInfoData[2].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[2].mRotationSpeed = 243.0f;
-        gPlanetInfoData[2].mTranslationMat = mat4::translation(vec3(20.0f, 0, 5));
-        gPlanetInfoData[2].mScaleMat = mat4::scale(vec3(2));
-        gPlanetInfoData[2].mColor = vec4(0.6f, 0.32f, 0.006f, 1.0f);
-        gPlanetInfoData[2].mMorphingSpeed = 1;
+        //// Venus
+        //gPlanetInfoData[2].mParentIndex = 0;
+        //gPlanetInfoData[2].mYOrbitSpeed = 0.8f;
+        //gPlanetInfoData[2].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[2].mRotationSpeed = 243.0f;
+        //gPlanetInfoData[2].mTranslationMat = mat4::translation(vec3(20.0f, 0, 5));
+        //gPlanetInfoData[2].mScaleMat = mat4::scale(vec3(2));
+        //gPlanetInfoData[2].mColor = vec4(0.6f, 0.32f, 0.006f, 1.0f);
+        //gPlanetInfoData[2].mMorphingSpeed = 1;
 
-        // Earth
-        gPlanetInfoData[3].mParentIndex = 0;
-        gPlanetInfoData[3].mYOrbitSpeed = 1.0f;
-        gPlanetInfoData[3].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[3].mRotationSpeed = 1.0f;
-        gPlanetInfoData[3].mTranslationMat = mat4::translation(vec3(30.0f, 0, 0));
-        gPlanetInfoData[3].mScaleMat = mat4::scale(vec3(4));
-        gPlanetInfoData[3].mColor = vec4(0.07f, 0.028f, 0.61f, 1.0f);
-        gPlanetInfoData[3].mMorphingSpeed = 1;
+        //// Earth
+        //gPlanetInfoData[3].mParentIndex = 0;
+        //gPlanetInfoData[3].mYOrbitSpeed = 1.0f;
+        //gPlanetInfoData[3].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[3].mRotationSpeed = 1.0f;
+        //gPlanetInfoData[3].mTranslationMat = mat4::translation(vec3(30.0f, 0, 0));
+        //gPlanetInfoData[3].mScaleMat = mat4::scale(vec3(4));
+        //gPlanetInfoData[3].mColor = vec4(0.07f, 0.028f, 0.61f, 1.0f);
+        //gPlanetInfoData[3].mMorphingSpeed = 1;
 
-        // Mars
-        gPlanetInfoData[4].mParentIndex = 0;
-        gPlanetInfoData[4].mYOrbitSpeed = 2.0f;
-        gPlanetInfoData[4].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[4].mRotationSpeed = 1.1f;
-        gPlanetInfoData[4].mTranslationMat = mat4::translation(vec3(40.0f, 0, 0));
-        gPlanetInfoData[4].mScaleMat = mat4::scale(vec3(3));
-        gPlanetInfoData[4].mColor = vec4(0.79f, 0.07f, 0.006f, 1.0f);
-        gPlanetInfoData[4].mMorphingSpeed = 1;
+        //// Mars
+        //gPlanetInfoData[4].mParentIndex = 0;
+        //gPlanetInfoData[4].mYOrbitSpeed = 2.0f;
+        //gPlanetInfoData[4].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[4].mRotationSpeed = 1.1f;
+        //gPlanetInfoData[4].mTranslationMat = mat4::translation(vec3(40.0f, 0, 0));
+        //gPlanetInfoData[4].mScaleMat = mat4::scale(vec3(3));
+        //gPlanetInfoData[4].mColor = vec4(0.79f, 0.07f, 0.006f, 1.0f);
+        //gPlanetInfoData[4].mMorphingSpeed = 1;
 
-        // Jupiter
-        gPlanetInfoData[5].mParentIndex = 0;
-        gPlanetInfoData[5].mYOrbitSpeed = 11.0f;
-        gPlanetInfoData[5].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[5].mRotationSpeed = 0.4f;
-        gPlanetInfoData[5].mTranslationMat = mat4::translation(vec3(50.0f, 0, 0));
-        gPlanetInfoData[5].mScaleMat = mat4::scale(vec3(8));
-        gPlanetInfoData[5].mColor = vec4(0.32f, 0.13f, 0.13f, 1);
-        gPlanetInfoData[5].mMorphingSpeed = 6;
+        //// Jupiter
+        //gPlanetInfoData[5].mParentIndex = 0;
+        //gPlanetInfoData[5].mYOrbitSpeed = 11.0f;
+        //gPlanetInfoData[5].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[5].mRotationSpeed = 0.4f;
+        //gPlanetInfoData[5].mTranslationMat = mat4::translation(vec3(50.0f, 0, 0));
+        //gPlanetInfoData[5].mScaleMat = mat4::scale(vec3(8));
+        //gPlanetInfoData[5].mColor = vec4(0.32f, 0.13f, 0.13f, 1);
+        //gPlanetInfoData[5].mMorphingSpeed = 6;
 
-        // Saturn
-        gPlanetInfoData[6].mParentIndex = 0;
-        gPlanetInfoData[6].mYOrbitSpeed = 29.4f;
-        gPlanetInfoData[6].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[6].mRotationSpeed = 0.5f;
-        gPlanetInfoData[6].mTranslationMat = mat4::translation(vec3(60.0f, 0, 0));
-        gPlanetInfoData[6].mScaleMat = mat4::scale(vec3(6));
-        gPlanetInfoData[6].mColor = vec4(0.45f, 0.45f, 0.21f, 1.0f);
-        gPlanetInfoData[6].mMorphingSpeed = 1;
+        //// Saturn
+        //gPlanetInfoData[6].mParentIndex = 0;
+        //gPlanetInfoData[6].mYOrbitSpeed = 29.4f;
+        //gPlanetInfoData[6].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[6].mRotationSpeed = 0.5f;
+        //gPlanetInfoData[6].mTranslationMat = mat4::translation(vec3(60.0f, 0, 0));
+        //gPlanetInfoData[6].mScaleMat = mat4::scale(vec3(6));
+        //gPlanetInfoData[6].mColor = vec4(0.45f, 0.45f, 0.21f, 1.0f);
+        //gPlanetInfoData[6].mMorphingSpeed = 1;
 
-        // Uranus
-        gPlanetInfoData[7].mParentIndex = 0;
-        gPlanetInfoData[7].mYOrbitSpeed = 84.07f;
-        gPlanetInfoData[7].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[7].mRotationSpeed = 0.8f;
-        gPlanetInfoData[7].mTranslationMat = mat4::translation(vec3(70.0f, 0, 0));
-        gPlanetInfoData[7].mScaleMat = mat4::scale(vec3(7));
-        gPlanetInfoData[7].mColor = vec4(0.13f, 0.13f, 0.32f, 1.0f);
-        gPlanetInfoData[7].mMorphingSpeed = 1;
+        //// Uranus
+        //gPlanetInfoData[7].mParentIndex = 0;
+        //gPlanetInfoData[7].mYOrbitSpeed = 84.07f;
+        //gPlanetInfoData[7].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[7].mRotationSpeed = 0.8f;
+        //gPlanetInfoData[7].mTranslationMat = mat4::translation(vec3(70.0f, 0, 0));
+        //gPlanetInfoData[7].mScaleMat = mat4::scale(vec3(7));
+        //gPlanetInfoData[7].mColor = vec4(0.13f, 0.13f, 0.32f, 1.0f);
+        //gPlanetInfoData[7].mMorphingSpeed = 1;
 
-        // Neptune
-        gPlanetInfoData[8].mParentIndex = 0;
-        gPlanetInfoData[8].mYOrbitSpeed = 164.81f;
-        gPlanetInfoData[8].mZOrbitSpeed = 0.0f;
-        gPlanetInfoData[8].mRotationSpeed = 0.9f;
-        gPlanetInfoData[8].mTranslationMat = mat4::translation(vec3(80.0f, 0, 0));
-        gPlanetInfoData[8].mScaleMat = mat4::scale(vec3(8));
-        gPlanetInfoData[8].mColor = vec4(0.21f, 0.028f, 0.79f, 1.0f);
-        gPlanetInfoData[8].mMorphingSpeed = 1;
+        //// Neptune
+        //gPlanetInfoData[8].mParentIndex = 0;
+        //gPlanetInfoData[8].mYOrbitSpeed = 164.81f;
+        //gPlanetInfoData[8].mZOrbitSpeed = 0.0f;
+        //gPlanetInfoData[8].mRotationSpeed = 0.9f;
+        //gPlanetInfoData[8].mTranslationMat = mat4::translation(vec3(80.0f, 0, 0));
+        //gPlanetInfoData[8].mScaleMat = mat4::scale(vec3(8));
+        //gPlanetInfoData[8].mColor = vec4(0.21f, 0.028f, 0.79f, 1.0f);
+        //gPlanetInfoData[8].mMorphingSpeed = 1;
 
-        // Pluto - Not a planet XDD
-        gPlanetInfoData[9].mParentIndex = 0;
-        gPlanetInfoData[9].mYOrbitSpeed = 247.7f;
-        gPlanetInfoData[9].mZOrbitSpeed = 1.0f;
-        gPlanetInfoData[9].mRotationSpeed = 7.0f;
-        gPlanetInfoData[9].mTranslationMat = mat4::translation(vec3(90.0f, 0, 0));
-        gPlanetInfoData[9].mScaleMat = mat4::scale(vec3(1.0f));
-        gPlanetInfoData[9].mColor = vec4(0.45f, 0.21f, 0.21f, 1.0f);
-        gPlanetInfoData[9].mMorphingSpeed = 1;
+        //// Pluto - Not a planet XDD
+        //gPlanetInfoData[9].mParentIndex = 0;
+        //gPlanetInfoData[9].mYOrbitSpeed = 247.7f;
+        //gPlanetInfoData[9].mZOrbitSpeed = 1.0f;
+        //gPlanetInfoData[9].mRotationSpeed = 7.0f;
+        //gPlanetInfoData[9].mTranslationMat = mat4::translation(vec3(90.0f, 0, 0));
+        //gPlanetInfoData[9].mScaleMat = mat4::scale(vec3(1.0f));
+        //gPlanetInfoData[9].mColor = vec4(0.45f, 0.21f, 0.21f, 1.0f);
+        //gPlanetInfoData[9].mMorphingSpeed = 1;
 
-        // Moon
-        gPlanetInfoData[10].mParentIndex = 3;
-        gPlanetInfoData[10].mYOrbitSpeed = 1.0f;
-        gPlanetInfoData[10].mZOrbitSpeed = 200.0f;
-        gPlanetInfoData[10].mRotationSpeed = 27.0f;
-        gPlanetInfoData[10].mTranslationMat = mat4::translation(vec3(5.0f, 0, 0));
-        gPlanetInfoData[10].mScaleMat = mat4::scale(vec3(1));
-        gPlanetInfoData[10].mColor = vec4(0.07f, 0.07f, 0.13f, 1.0f);
-        gPlanetInfoData[10].mMorphingSpeed = 1;
+        //// Moon
+        //gPlanetInfoData[10].mParentIndex = 3;
+        //gPlanetInfoData[10].mYOrbitSpeed = 1.0f;
+        //gPlanetInfoData[10].mZOrbitSpeed = 200.0f;
+        //gPlanetInfoData[10].mRotationSpeed = 27.0f;
+        //gPlanetInfoData[10].mTranslationMat = mat4::translation(vec3(5.0f, 0, 0));
+        //gPlanetInfoData[10].mScaleMat = mat4::scale(vec3(1));
+        //gPlanetInfoData[10].mColor = vec4(0.07f, 0.07f, 0.13f, 1.0f);
+        //gPlanetInfoData[10].mMorphingSpeed = 1;
 
         CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f };
         vec3                   camPos{ 48.0f, 48.0f, 20.0f };
@@ -857,7 +857,7 @@ public:
 
         for (uint32_t i = 0; i < gDataBufferCount; ++i)
         {
-            removeResource(pProjViewUniformBuffer[i]);
+            //removeResource(pProjViewUniformBuffer[i]);
             removeResource(pSkyboxUniformBuffer[i]);
             if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
             {
@@ -938,8 +938,8 @@ public:
         if (pReloadDesc->mType & (RELOAD_TYPE_SHADER | RELOAD_TYPE_RENDERTARGET))
         {
             removePipelines();
-            removeResource(pSphereVertexBuffer);
-            removeResource(pSphereIndexBuffer);
+            //removeResource(pSphereVertexBuffer);
+            //removeResource(pSphereIndexBuffer);
         }
 
         if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -975,45 +975,45 @@ public:
         const float  aspectInverse = (float)mSettings.mHeight / (float)mSettings.mWidth;
         const float  horizontal_fov = PI / 2.0f;
         CameraMatrix projMat = CameraMatrix::perspectiveReverseZ(horizontal_fov, aspectInverse, 0.1f, 1000.0f);
-        gUniformData.mProjectView = projMat * viewMat;
+        //gUniformData.mProjectView = projMat * viewMat;
 
         // point light parameters
-        gUniformData.mLightPosition = vec3(0, 0, 0);
-        gUniformData.mLightColor = vec3(0.9f, 0.9f, 0.7f); // Pale Yellow
+        //gUniformData.mLightPosition = vec3(0, 0, 0);
+        //gUniformData.mLightColor = vec3(0.9f, 0.9f, 0.7f); // Pale Yellow
 
         // update planet transformations
         for (unsigned int i = 0; i < gNumPlanets; i++)
         {
             mat4 rotSelf, rotOrbitY, rotOrbitZ, trans, scale, parentMat;
             rotSelf = rotOrbitY = rotOrbitZ = parentMat = mat4::identity();
-            if (gPlanetInfoData[i].mRotationSpeed > 0.0f)
-                rotSelf = mat4::rotationY(gRotSelfScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mRotationSpeed);
-            if (gPlanetInfoData[i].mYOrbitSpeed > 0.0f)
-                rotOrbitY = mat4::rotationY(gRotOrbitYScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mYOrbitSpeed);
-            if (gPlanetInfoData[i].mZOrbitSpeed > 0.0f)
-                rotOrbitZ = mat4::rotationZ(gRotOrbitZScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mZOrbitSpeed);
-            if (gPlanetInfoData[i].mParentIndex > 0)
-                parentMat = gPlanetInfoData[gPlanetInfoData[i].mParentIndex].mSharedMat;
+            //if (gPlanetInfoData[i].mRotationSpeed > 0.0f)
+            //    rotSelf = mat4::rotationY(gRotSelfScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mRotationSpeed);
+            //if (gPlanetInfoData[i].mYOrbitSpeed > 0.0f)
+            //    rotOrbitY = mat4::rotationY(gRotOrbitYScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mYOrbitSpeed);
+            //if (gPlanetInfoData[i].mZOrbitSpeed > 0.0f)
+            //    rotOrbitZ = mat4::rotationZ(gRotOrbitZScale * (currentTime + gTimeOffset) / gPlanetInfoData[i].mZOrbitSpeed);
+            //if (gPlanetInfoData[i].mParentIndex > 0)
+            //    parentMat = gPlanetInfoData[gPlanetInfoData[i].mParentIndex].mSharedMat;
 
-            trans = gPlanetInfoData[i].mTranslationMat;
-            scale = gPlanetInfoData[i].mScaleMat;
+            //trans = gPlanetInfoData[i].mTranslationMat;
+            //scale = gPlanetInfoData[i].mScaleMat;
 
             scale[0][0] /= 2;
             scale[1][1] /= 2;
             scale[2][2] /= 2;
 
-            gPlanetInfoData[i].mSharedMat = parentMat * rotOrbitY * trans;
-            gUniformData.mToWorldMat[i] = parentMat * rotOrbitY * rotOrbitZ * trans * rotSelf * scale;
-            gUniformData.mColor[i] = gPlanetInfoData[i].mColor;
+            //gPlanetInfoData[i].mSharedMat = parentMat * rotOrbitY * trans;
+            //gUniformData.mToWorldMat[i] = parentMat * rotOrbitY * rotOrbitZ * trans * rotSelf * scale;
+            //gUniformData.mColor[i] = gPlanetInfoData[i].mColor;
 
-            float step;
-            float phase = modf(currentTime * gPlanetInfoData[i].mMorphingSpeed / 2000.f, &step);
-            if (phase > 0.5f)
-                phase = 2 - phase * 2;
-            else
-                phase = phase * 2;
+            //float step;
+            //float phase = modf(currentTime * gPlanetInfoData[i].mMorphingSpeed / 2000.f, &step);
+            //if (phase > 0.5f)
+            //    phase = 2 - phase * 2;
+            //else
+            //    phase = phase * 2;
 
-            gUniformData.mGeometryWeight[i][0] = phase;
+            //gUniformData.mGeometryWeight[i][0] = phase;
         }
 
         viewMat.setTranslation(vec3(0));
@@ -1048,10 +1048,10 @@ public:
         }
 
         // Update uniform buffers
-        BufferUpdateDesc viewProjCbv = { pProjViewUniformBuffer[gFrameIndex] };
-        beginUpdateResource(&viewProjCbv);
-        memcpy(viewProjCbv.pMappedData, &gUniformData, sizeof(gUniformData));
-        endUpdateResource(&viewProjCbv);
+        //BufferUpdateDesc viewProjCbv = { pProjViewUniformBuffer[gFrameIndex] };
+        //beginUpdateResource(&viewProjCbv);
+        //memcpy(viewProjCbv.pMappedData, &gUniformData, sizeof(gUniformData));
+        //endUpdateResource(&viewProjCbv);
 
         BufferUpdateDesc skyboxViewProjCbv = { pSkyboxUniformBuffer[gFrameIndex] };
         beginUpdateResource(&skyboxViewProjCbv);
@@ -1132,41 +1132,41 @@ public:
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
         cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
 
-        ////// draw planets
-        cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw Planets");
+        //////// draw planets
+        //cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw Planets");
 
-        Pipeline* pipeline = pSpherePipeline;
+        //Pipeline* pipeline = pSpherePipeline;
 
-        // Using the malfunctioned pipeline
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs && bSimulateCrash)
-        {
-            gCrashedFrame = gFrameIndex;
-            bSimulateCrash = false;
-            bHasCrashed = true;
-            pipeline = pCrashPipeline;
-            LOGF(LogLevel::eERROR, "[Breadcrumb] Simulating a GPU crash situation...");
-        }
+        //// Using the malfunctioned pipeline
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs && bSimulateCrash)
+        //{
+        //    gCrashedFrame = gFrameIndex;
+        //    bSimulateCrash = false;
+        //    bHasCrashed = true;
+        //    pipeline = pCrashPipeline;
+        //    LOGF(LogLevel::eERROR, "[Breadcrumb] Simulating a GPU crash situation...");
+        //}
 
-        cmdBindPipeline(cmd, pipeline);
-        cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 1, pDescriptorSetUniforms);
-        cmdBindVertexBuffer(cmd, 1, &pSphereVertexBuffer, &gSphereVertexLayout.mBindings[0].mStride, nullptr);
-        cmdBindIndexBuffer(cmd, pSphereIndexBuffer, INDEX_TYPE_UINT16, 0);
+        //cmdBindPipeline(cmd, pipeline);
+        //cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 1, pDescriptorSetUniforms);
+        //cmdBindVertexBuffer(cmd, 1, &pSphereVertexBuffer, &gSphereVertexLayout.mBindings[0].mStride, nullptr);
+        //cmdBindIndexBuffer(cmd, pSphereIndexBuffer, INDEX_TYPE_UINT16, 0);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            // Marker on top of the pip, won't wait for the following draw commands.
-            cmdWriteMarker(cmd, MARKER_TYPE_IN, gValidMarkerValue, pMarkerBuffer[gFrameIndex], 0, false);
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    // Marker on top of the pip, won't wait for the following draw commands.
+        //    cmdWriteMarker(cmd, MARKER_TYPE_IN, gValidMarkerValue, pMarkerBuffer[gFrameIndex], 0, false);
+        //}
 
-        cmdDrawIndexedInstanced(cmd, gSphereIndexCount, 0, gNumPlanets, 0, 0);
+        //cmdDrawIndexedInstanced(cmd, gSphereIndexCount, 0, gNumPlanets, 0, 0);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            // Marker on bottom of the pip, will wait for draw command to be executed.
-            cmdWriteMarker(cmd, MARKER_TYPE_OUT, gValidMarkerValue, pMarkerBuffer[gFrameIndex], 1, false);
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    // Marker on bottom of the pip, will wait for draw command to be executed.
+        //    cmdWriteMarker(cmd, MARKER_TYPE_OUT, gValidMarkerValue, pMarkerBuffer[gFrameIndex], 1, false);
+        //}
 
-        cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
+        //cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
 
         if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
         {
@@ -1292,16 +1292,16 @@ public:
 
     void addRootSignatures()
     {
-        Shader*  shaders[3];
-        uint32_t shadersCount = 2;
-        shaders[0] = pSphereShader;
-        shaders[1] = pSkyBoxDrawShader;
+        Shader*  shaders[2];
+        uint32_t shadersCount = 1;
+        //shaders[0] = pSphereShader;
+        shaders[0] = pSkyBoxDrawShader;
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            shaders[2] = pCrashShader;
-            shadersCount = 3;
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    shaders[1] = pCrashShader;
+        //    shadersCount = 2;
+        //}
 
         const char*       pStaticSamplers[] = { "uSampler0" };
         RootSignatureDesc rootDesc = {};
@@ -1321,29 +1321,29 @@ public:
         skyShader.mStages[0].pFileName = "skybox.vert";
         skyShader.mStages[1].pFileName = "skybox.frag";
 
-        ShaderLoadDesc basicShader = {};
-        basicShader.mStages[0].pFileName = "basic.vert";
-        basicShader.mStages[1].pFileName = "basic.frag";
+        //ShaderLoadDesc basicShader = {};
+        //basicShader.mStages[0].pFileName = "basic.vert";
+        //basicShader.mStages[1].pFileName = "basic.frag";
 
         addShader(pRenderer, &skyShader, &pSkyBoxDrawShader);
-        addShader(pRenderer, &basicShader, &pSphereShader);
+        //addShader(pRenderer, &basicShader, &pSphereShader);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            ShaderLoadDesc crashShader = {};
-            crashShader.mStages[0].pFileName = "crash.vert";
-            crashShader.mStages[1].pFileName = "basic.frag";
-            addShader(pRenderer, &crashShader, &pCrashShader);
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    ShaderLoadDesc crashShader = {};
+        //    crashShader.mStages[0].pFileName = "crash.vert";
+        //    crashShader.mStages[1].pFileName = "basic.frag";
+        //    addShader(pRenderer, &crashShader, &pCrashShader);
+        //}
     }
 
     void removeShaders()
     {
-        removeShader(pRenderer, pSphereShader);
+        //removeShader(pRenderer, pSphereShader);
         removeShader(pRenderer, pSkyBoxDrawShader);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-            removeShader(pRenderer, pCrashShader);
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //    removeShader(pRenderer, pCrashShader);
     }
 
     void addPipelines()
@@ -1370,17 +1370,17 @@ public:
         pipelineSettings.mSampleQuality = pSwapChain->ppRenderTargets[0]->mSampleQuality;
         pipelineSettings.mDepthStencilFormat = pDepthBuffer->mFormat;
         pipelineSettings.pRootSignature = pRootSignature;
-        pipelineSettings.pShaderProgram = pSphereShader;
-        pipelineSettings.pVertexLayout = &gSphereVertexLayout;
+        //pipelineSettings.pShaderProgram = pSphereShader;
+        //pipelineSettings.pVertexLayout = &gSphereVertexLayout;
         pipelineSettings.pRasterizerState = &sphereRasterizerStateDesc;
         pipelineSettings.mVRFoveatedRendering = true;
-        addPipeline(pRenderer, &desc, &pSpherePipeline);
+        //addPipeline(pRenderer, &desc, &pSpherePipeline);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            pipelineSettings.pShaderProgram = pCrashShader;
-            addPipeline(pRenderer, &desc, &pCrashPipeline);
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    pipelineSettings.pShaderProgram = pCrashShader;
+        //    addPipeline(pRenderer, &desc, &pCrashPipeline);
+        //}
 
         // layout and pipeline for skybox draw
         VertexLayout vertexLayout = {};
@@ -1403,12 +1403,12 @@ public:
     void removePipelines()
     {
         removePipeline(pRenderer, pSkyBoxDrawPipeline);
-        removePipeline(pRenderer, pSpherePipeline);
+        //removePipeline(pRenderer, pSpherePipeline);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            removePipeline(pRenderer, pCrashPipeline);
-        }
+        //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        //{
+        //    removePipeline(pRenderer, pCrashPipeline);
+        //}
     }
 
     void prepareDescriptorSets()
@@ -1437,7 +1437,7 @@ public:
             updateDescriptorSet(pRenderer, i * 2 + 0, pDescriptorSetUniforms, 1, params);
 
             params[0].pName = "uniformBlock";
-            params[0].ppBuffers = &pProjViewUniformBuffer[i];
+            //params[0].ppBuffers = &pProjViewUniformBuffer[i];
             updateDescriptorSet(pRenderer, i * 2 + 1, pDescriptorSetUniforms, 1, params);
         }
     }

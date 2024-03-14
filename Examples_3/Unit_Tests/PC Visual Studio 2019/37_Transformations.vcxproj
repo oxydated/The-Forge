@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\37_Transformations\37_Transformations.cpp" />
+    <ClCompile Include="..\src\37_Transformations\CastleApp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.frag.fsl" />
@@ -27,6 +28,14 @@
     <None Include="..\UnitTestResources\Scripts\TestCenteredWindow.lua" />
     <None Include="..\UnitTestResources\Scripts\TestFullScreen.lua" />
     <None Include="..\UnitTestResources\Scripts\TestNonCenteredWindow.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\37_Transformations\CastleApp.h" />
+    <ClInclude Include="..\src\37_Transformations\CmdRing.h" />
+    <ClInclude Include="..\src\37_Transformations\CmdRingElement.h" />
+    <ClInclude Include="..\src\37_Transformations\Command.h" />
+    <ClInclude Include="..\src\37_Transformations\Pipeline.h" />
+    <ClInclude Include="..\src\37_Transformations\GPUQueue.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{92429F3A-3940-490E-8DF6-0A51496819EA}</ProjectGuid>
