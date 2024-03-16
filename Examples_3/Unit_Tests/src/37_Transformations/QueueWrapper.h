@@ -4,10 +4,10 @@
 
 class Command;
 
-class GPUQueue
+class QueueWrapper
 {
 public:
-    GPUQueue();
+    QueueWrapper();
 
     void submit();
 

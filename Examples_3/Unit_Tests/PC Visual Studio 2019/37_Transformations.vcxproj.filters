@@ -87,7 +87,28 @@
     <ClInclude Include="..\src\37_Transformations\Command.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\37_Transformations\GPUQueue.h">
+    <ClInclude Include="..\src\37_Transformations\QueueWrapper.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\IResourceSet.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\Signature.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\RenderTargetWrapper.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\BufferResource.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\RendererWrapper.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\SwapChainWrapper.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\SemaphoreWrapper.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
   </ItemGroup>

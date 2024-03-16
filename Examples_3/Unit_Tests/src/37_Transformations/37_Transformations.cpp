@@ -87,7 +87,7 @@ DescriptorSet* pDescriptorSetUniforms = { NULL };
 Buffer* pSkyboxUniformBuffer[gDataBufferCount] = { NULL };
 
 uint32_t     gFrameIndex = 0;
-ProfileToken gGpuProfileToken = PROFILE_INVALID_TOKEN;
+//ProfileToken gGpuProfileToken = PROFILE_INVALID_TOKEN;
 
 int              gNumberOfSpherePoints;
 UniformBlockSky  gUniformDataSky;
@@ -98,7 +98,7 @@ UIComponent* pGuiWindow = NULL;
 
 uint32_t gFontID = 0;
 
-QueryPool* pPipelineStatsQueryPool[gDataBufferCount] = {};
+//QueryPool* pPipelineStatsQueryPool[gDataBufferCount] = {};
 
 /// Breadcrumb
 /* Markers to be used to pinpoint which command has caused GPU hang.
@@ -122,7 +122,7 @@ DECLARE_RENDERER_FUNCTION(void, mapBuffer, Renderer* pRenderer, Buffer* pBuffer,
 DECLARE_RENDERER_FUNCTION(void, unmapBuffer, Renderer* pRenderer, Buffer* pBuffer)
 
 const char* pSkyBoxImageFileNames[] = { "Skybox_right1.tex",  "Skybox_left2.tex",  "Skybox_top3.tex",
-                                        "Skybox_bottom4.tex", "Skybox_front5.tex", "Skybox_back6.tex" };
+                                        "Skybox_bottom4.tex", "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
 
 FontDrawDesc gFrameTimeDraw;
 
@@ -213,16 +213,16 @@ public:
         if (!pRenderer)
             return false;
 
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            QueryPoolDesc poolDesc = {};
-            poolDesc.mQueryCount = 3; // The count is 3 due to quest & multi-view use otherwise 2 is enough as we use 2 queries.
-            poolDesc.mType = QUERY_TYPE_PIPELINE_STATISTICS;
-            for (uint32_t i = 0; i < gDataBufferCount; ++i)
-            {
-                addQueryPool(pRenderer, &poolDesc, &pPipelineStatsQueryPool[i]);
-            }
-        }
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    QueryPoolDesc poolDesc = {};
+        //    poolDesc.mQueryCount = 3; // The count is 3 due to quest & multi-view use otherwise 2 is enough as we use 2 queries.
+        //    poolDesc.mType = QUERY_TYPE_PIPELINE_STATISTICS;
+        //    for (uint32_t i = 0; i < gDataBufferCount; ++i)
+        //    {
+        //        addQueryPool(pRenderer, &poolDesc, &pPipelineStatsQueryPool[i]);
+        //    }
+        //}
 
         QueueDesc queueDesc = {};
         queueDesc.mType = QUEUE_TYPE_GRAPHICS;
@@ -303,14 +303,14 @@ public:
         initUserInterface(&uiRenderDesc);
 
         // Initialize micro profiler and its UI.
-        ProfilerDesc profiler = {};
-        profiler.pRenderer = pRenderer;
-        profiler.mWidthUI = mSettings.mWidth;
-        profiler.mHeightUI = mSettings.mHeight;
-        initProfiler(&profiler);
+        //ProfilerDesc profiler = {};
+        //profiler.pRenderer = pRenderer;
+        //profiler.mWidthUI = mSettings.mWidth;
+        //profiler.mHeightUI = mSettings.mHeight;
+        //initProfiler(&profiler);
 
         // Gpu profiler can only be added after initProfile.
-        gGpuProfileToken = addGpuProfiler(pRenderer, pGraphicsQueue, "Graphics");
+        //gGpuProfileToken = addGpuProfiler(pRenderer, pGraphicsQueue, "Graphics");
 
         /************************************************************************/
         // GUI
@@ -319,14 +319,14 @@ public:
         guiDesc.mStartPosition = vec2(mSettings.mWidth * 0.01f, mSettings.mHeight * 0.2f);
         uiCreateComponent(GetName(), &guiDesc, &pGuiWindow);
 
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            static float4     color = { 1.0f, 1.0f, 1.0f, 1.0f };
-            DynamicTextWidget statsWidget;
-            statsWidget.pText = &gPipelineStats;
-            statsWidget.pColor = &color;
-            uiCreateComponentWidget(pGuiWindow, "Pipeline Stats", &statsWidget, WIDGET_TYPE_DYNAMIC_TEXT);
-        }
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    static float4     color = { 1.0f, 1.0f, 1.0f, 1.0f };
+        //    DynamicTextWidget statsWidget;
+        //    statsWidget.pText = &gPipelineStats;
+        //    statsWidget.pColor = &color;
+        //    uiCreateComponentWidget(pGuiWindow, "Pipeline Stats", &statsWidget, WIDGET_TYPE_DYNAMIC_TEXT);
+        //}
 
         if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
         {
@@ -475,10 +475,10 @@ public:
         for (uint32_t i = 0; i < gDataBufferCount; ++i)
         {
             removeResource(pSkyboxUniformBuffer[i]);
-            if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-            {
-                removeQueryPool(pRenderer, pPipelineStatsQueryPool[i]);
-            }
+            //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+            //{
+            //    removeQueryPool(pRenderer, pPipelineStatsQueryPool[i]);
+            //}
         }
 
         removeResource(pSkyBoxVertexBuffer);
@@ -639,32 +639,32 @@ public:
         // Reset cmd pool for this frame
         resetCmdPool(pRenderer, elem.pCmdPool);
 
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            QueryData data3D = {};
-            QueryData data2D = {};
-            getQueryData(pRenderer, pPipelineStatsQueryPool[gFrameIndex], 0, &data3D);
-            getQueryData(pRenderer, pPipelineStatsQueryPool[gFrameIndex], 1, &data2D);
-            bformat(&gPipelineStats,
-                    "\n"
-                    "Pipeline Stats 3D:\n"
-                    "    VS invocations:      %u\n"
-                    "    PS invocations:      %u\n"
-                    "    Clipper invocations: %u\n"
-                    "    IA primitives:       %u\n"
-                    "    Clipper primitives:  %u\n"
-                    "\n"
-                    "Pipeline Stats 2D UI:\n"
-                    "    VS invocations:      %u\n"
-                    "    PS invocations:      %u\n"
-                    "    Clipper invocations: %u\n"
-                    "    IA primitives:       %u\n"
-                    "    Clipper primitives:  %u\n",
-                    data3D.mPipelineStats.mVSInvocations, data3D.mPipelineStats.mPSInvocations, data3D.mPipelineStats.mCInvocations,
-                    data3D.mPipelineStats.mIAPrimitives, data3D.mPipelineStats.mCPrimitives, data2D.mPipelineStats.mVSInvocations,
-                    data2D.mPipelineStats.mPSInvocations, data2D.mPipelineStats.mCInvocations, data2D.mPipelineStats.mIAPrimitives,
-                    data2D.mPipelineStats.mCPrimitives);
-        }
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    QueryData data3D = {};
+        //    QueryData data2D = {};
+        //    getQueryData(pRenderer, pPipelineStatsQueryPool[gFrameIndex], 0, &data3D);
+        //    getQueryData(pRenderer, pPipelineStatsQueryPool[gFrameIndex], 1, &data2D);
+        //    bformat(&gPipelineStats,
+        //            "\n"
+        //            "Pipeline Stats 3D:\n"
+        //            "    VS invocations:      %u\n"
+        //            "    PS invocations:      %u\n"
+        //            "    Clipper invocations: %u\n"
+        //            "    IA primitives:       %u\n"
+        //            "    Clipper primitives:  %u\n"
+        //            "\n"
+        //            "Pipeline Stats 2D UI:\n"
+        //            "    VS invocations:      %u\n"
+        //            "    PS invocations:      %u\n"
+        //            "    Clipper invocations: %u\n"
+        //            "    IA primitives:       %u\n"
+        //            "    Clipper primitives:  %u\n",
+        //            data3D.mPipelineStats.mVSInvocations, data3D.mPipelineStats.mPSInvocations, data3D.mPipelineStats.mCInvocations,
+        //            data3D.mPipelineStats.mIAPrimitives, data3D.mPipelineStats.mCPrimitives, data2D.mPipelineStats.mVSInvocations,
+        //            data2D.mPipelineStats.mPSInvocations, data2D.mPipelineStats.mCInvocations, data2D.mPipelineStats.mIAPrimitives,
+        //            data2D.mPipelineStats.mCPrimitives);
+        //}
 
         Cmd* cmd = elem.pCmds[0];
         beginCmd(cmd);
@@ -675,13 +675,13 @@ public:
             resetMarkers(cmd);
         }
 
-        cmdBeginGpuFrameProfile(cmd, gGpuProfileToken);
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            cmdResetQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], 0, 2);
-            QueryDesc queryDesc = { 0 };
-            cmdBeginQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
-        }
+        //cmdBeginGpuFrameProfile(cmd, gGpuProfileToken);
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    cmdResetQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], 0, 2);
+        //    QueryDesc queryDesc = { 0 };
+        //    cmdBeginQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
+        //}
 
         RenderTargetBarrier barriers[] = {
             { pRenderTarget, RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET },
@@ -700,7 +700,7 @@ public:
         const uint32_t skyboxVbStride = sizeof(float) * 4;
 
         // draw skybox
-        cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw Skybox");
+        //cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw Skybox");
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
         cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
         cmdBindDescriptorSet(cmd, 0, pDescriptorSetTexture);
@@ -708,46 +708,46 @@ public:
         cmdBindVertexBuffer(cmd, 1, &pSkyBoxVertexBuffer, &skyboxVbStride, NULL);
         cmdDraw(cmd, 36, 0);
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
-        cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
+        //cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
 
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            QueryDesc queryDesc = { 0 };
-            cmdEndQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    QueryDesc queryDesc = { 0 };
+        //    cmdEndQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
 
-            queryDesc = { 1 };
-            cmdBeginQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
-        }
+        //    queryDesc = { 1 };
+        //    cmdBeginQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
+        //}
 
         bindRenderTargets = {};
         bindRenderTargets.mRenderTargetCount = 1;
         bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_LOAD };
         cmdBindRenderTargets(cmd, &bindRenderTargets);
 
-        cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw UI");
+        //cmdBeginGpuTimestampQuery(cmd, gGpuProfileToken, "Draw UI");
 
-        gFrameTimeDraw.mFontColor = 0xff00ffff;
-        gFrameTimeDraw.mFontSize = 18.0f;
-        gFrameTimeDraw.mFontID = gFontID;
-        float2 txtSizePx = cmdDrawCpuProfile(cmd, float2(8.f, 15.f), &gFrameTimeDraw);
-        cmdDrawGpuProfile(cmd, float2(8.f, txtSizePx.y + 75.f), gGpuProfileToken, &gFrameTimeDraw);
+        //gFrameTimeDraw.mFontColor = 0xff00ffff;
+        //gFrameTimeDraw.mFontSize = 18.0f;
+        //gFrameTimeDraw.mFontID = gFontID;
+        //float2 txtSizePx = cmdDrawCpuProfile(cmd, float2(8.f, 15.f), &gFrameTimeDraw);
+        //cmdDrawGpuProfile(cmd, float2(8.f, txtSizePx.y + 75.f), gGpuProfileToken, &gFrameTimeDraw);
 
         cmdDrawUserInterface(cmd);
 
         cmdBindRenderTargets(cmd, NULL);
-        cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
+        //cmdEndGpuTimestampQuery(cmd, gGpuProfileToken);
 
         barriers[0] = { pRenderTarget, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
         cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
 
-        cmdEndGpuFrameProfile(cmd, gGpuProfileToken);
+        //cmdEndGpuFrameProfile(cmd, gGpuProfileToken);
 
-        if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
-        {
-            QueryDesc queryDesc = { 1 };
-            cmdEndQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
-            cmdResolveQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], 0, 2);
-        }
+        //if (pRenderer->pGpu->mSettings.mPipelineStatsQueries)
+        //{
+        //    QueryDesc queryDesc = { 1 };
+        //    cmdEndQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], &queryDesc);
+        //    cmdResolveQuery(cmd, pPipelineStatsQueryPool[gFrameIndex], 0, 2);
+        //}
 
         endCmd(cmd);
 
