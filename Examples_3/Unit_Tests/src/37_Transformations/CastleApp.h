@@ -1,38 +1,62 @@
 #ifndef __CASTLEAPP__H__
 #define __CASTLEAPP__H__
 
-#include "../../../../Common_3/Application/Interfaces/IApp.h"
-
 // Renderer
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
+
+#include "Command.h"
+#include "CmdRing.h"
+#include "QueueWrapper.h"
+#include "SwapChainWrapper.h"
+//#include "IAppCommand.h"
+#include "projections.h"
+#include "UniformSet.h"
+#include "PipelineWrapper.h"
+#include "TextureSet.h"
+#include "UniformSet.h"
+#include "BufferResource.h"
 
 class CastleApp: public IApp
 {
 private:
 
-    Queue* pGraphicsQueue = NULL;
-    Renderer*  pRenderer = NULL;
-    SwapChain* pSwapChain = NULL;
+    UniformBlockSky skyUniformHostBlock;
 
-    // Depth Buffer
-    RenderTarget* pDepthBuffer = NULL;
+    // wrappers
 
-    //// Root Signature
-    //RootSignature* pRootSignature = NULL;
+    CmdRing* CommandRing = NULL;
+    QueueWrapper* graphicsQueue = NULL;
+    SwapChainWrapper* chain = NULL;
+    UniformSet*       skyUniform;
+    PipelineWrapper*  skyBoxDrawPipeline;
+    TextureSet*       skyBoxTextures;
+    UniformSet*       skyUniforms;
+    BufferResource*   skyBoxVertexBuffer;
 
-    // texture Descriptor Set
-    DescriptorSet* pDescriptorSetTexture = { NULL };
 
-    // Uniform Descriptor Set
-    DescriptorSet* pDescriptorSetUniforms = { NULL };
+    //Queue* pGraphicsQueue = NULL;
+    //Renderer*  pRenderer = NULL;
+    //SwapChain* pSwapChain = NULL;
 
-    bool addSwapChain();
+    //// Depth Buffer
+    //RenderTarget* pDepthBuffer = NULL;
 
-    bool addDepthBuffer();
+    ////// Root Signature
+    ////RootSignature* pRootSignature = NULL;
 
-    void addDescriptorSets();
+    //// texture Descriptor Set
+    //DescriptorSet* pDescriptorSetTexture = { NULL };
 
-    void removeDescriptorSets();
+    //// Uniform Descriptor Set
+    //DescriptorSet* pDescriptorSetUniforms = { NULL };
+
+    //bool addSwapChain();
+
+    //bool addDepthBuffer();
+
+    //void addDescriptorSets();
+
+    //void removeDescriptorSets();
 
     //void addRootSignatures();
 
@@ -40,19 +64,23 @@ private:
 
     //void addShaders();
 
-    void removeShaders();
+    //void removeShaders();
 
-    void addPipelines();
+    //void addPipelines();
 
-    void removePipelines();
+    //void removePipelines();
 
-    void prepareDescriptorSets();
+    //void prepareDescriptorSets();
 
-    void initMarkers();
+    //void initMarkers();
 
-    void checkMarkers();
+    //void checkMarkers();
 
-    void resetMarkers(Cmd* pCmd);
+    //void resetMarkers(Cmd* pCmd);
+
+    static void commandsToRecord(void*);
+
+    void Draw() override;
 };
 
 #endif

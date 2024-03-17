@@ -243,6 +243,8 @@ public:
                                     ADDRESS_MODE_CLAMP_TO_EDGE };
         addSampler(pRenderer, &samplerDesc, &pSamplerSkyBox);
 
+        // Loads Skybox vertex buffer
+
         uint64_t       skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
         BufferLoadDesc skyboxVbDesc = {};
         skyboxVbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_VERTEX_BUFFER;
@@ -251,6 +253,8 @@ public:
         skyboxVbDesc.pData = gSkyBoxPoints;
         skyboxVbDesc.ppBuffer = &pSkyBoxVertexBuffer;
         addResource(&skyboxVbDesc, NULL);
+
+        // loads skybox uniform buffer
 
         BufferLoadDesc ubDesc = {};
         ubDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -467,6 +471,7 @@ public:
             addShaders();
             addRootSignatures();
             addDescriptorSets();
+            prepareDescriptorSets();
         }
 
         if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -483,7 +488,8 @@ public:
             addPipelines();
         }
 
-        prepareDescriptorSets();
+
+        // UI stuff
 
         UserInterfaceLoadDesc uiLoad = {};
         uiLoad.mColorFormat = pSwapChain->ppRenderTargets[0]->mFormat;
@@ -550,17 +556,6 @@ public:
         const float  horizontal_fov = PI / 2.0f;
         CameraMatrix projMat = CameraMatrix::perspectiveReverseZ(horizontal_fov, aspectInverse, 0.1f, 1000.0f);
 
-        // update planet transformations
-        for (unsigned int i = 0; i < gNumPlanets; i++)
-        {
-            mat4 rotSelf, rotOrbitY, rotOrbitZ, trans, scale, parentMat;
-            rotSelf = rotOrbitY = rotOrbitZ = parentMat = mat4::identity();
-
-            scale[0][0] /= 2;
-            scale[1][1] /= 2;
-            scale[2][2] /= 2;
-        }
-
         viewMat.setTranslation(vec3(0));
         gUniformDataSky = {};
         gUniformDataSky.mProjectView = projMat * viewMat;
@@ -568,16 +563,19 @@ public:
 
     void Draw()
     {
+        // Wait for Idle Queue
         if (pSwapChain->mEnableVsync != mSettings.mVSyncEnabled)
         {
             waitQueueIdle(pGraphicsQueue);
             ::toggleVSync(pRenderer, &pSwapChain);
         }
 
+        // acquire next image index in Swapchain and get respective RenderTarget
         uint32_t swapchainImageIndex;
         acquireNextImage(pRenderer, pSwapChain, pImageAcquiredSemaphore, NULL, &swapchainImageIndex);
-
         RenderTarget*     pRenderTarget = pSwapChain->ppRenderTargets[swapchainImageIndex];
+
+        // get element from CmdRing
         GpuCmdRingElement elem = getNextGpuCmdRingElement(&gGraphicsCmdRing, true, 1);
 
         // Stall if CPU is running "gDataBufferCount" frames ahead of GPU
@@ -592,13 +590,19 @@ public:
             checkMarkers();
         }
 
+
+        // update uniform
+
         BufferUpdateDesc skyboxViewProjCbv = { pSkyboxUniformBuffer[gFrameIndex] };
         beginUpdateResource(&skyboxViewProjCbv);
         memcpy(skyboxViewProjCbv.pMappedData, &gUniformDataSky, sizeof(gUniformDataSky));
         endUpdateResource(&skyboxViewProjCbv);
 
         // Reset cmd pool for this frame
+
         resetCmdPool(pRenderer, elem.pCmdPool);
+
+        // record command buffer
 
         Cmd* cmd = elem.pCmds[0];
         beginCmd(cmd);
@@ -615,23 +619,33 @@ public:
         cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
 
         // simply record the screen cleaning command
+
         BindRenderTargetsDesc bindRenderTargets = {};
         bindRenderTargets.mRenderTargetCount = 1;
         bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_CLEAR };
         bindRenderTargets.mDepthStencil = { pDepthBuffer, LOAD_ACTION_CLEAR };
         cmdBindRenderTargets(cmd, &bindRenderTargets);
+
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
+
         cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
 
         const uint32_t skyboxVbStride = sizeof(float) * 4;
 
         // draw skybox
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
+
         cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
+
         cmdBindDescriptorSet(cmd, 0, pDescriptorSetTexture);
+
         cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 0, pDescriptorSetUniforms);
+
         cmdBindVertexBuffer(cmd, 1, &pSkyBoxVertexBuffer, &skyboxVbStride, NULL);
+
         cmdDraw(cmd, 36, 0);
+
+
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
 
         bindRenderTargets = {};
@@ -648,6 +662,8 @@ public:
 
         endCmd(cmd);
 
+        // Queue Submit
+
         FlushResourceUpdateDesc flushUpdateDesc = {};
         flushUpdateDesc.mNodeIndex = 0;
         flushResourceUpdates(&flushUpdateDesc);
@@ -662,14 +678,20 @@ public:
         submitDesc.ppWaitSemaphores = waitSemaphores;
         submitDesc.pSignalFence = elem.pFence;
         queueSubmit(pGraphicsQueue, &submitDesc);
+
+
+        // Queue present
+
         QueuePresentDesc presentDesc = {};
         presentDesc.mIndex = swapchainImageIndex;
         presentDesc.mWaitSemaphoreCount = 1;
         presentDesc.pSwapChain = pSwapChain;
         presentDesc.ppWaitSemaphores = &elem.pSemaphore;
         presentDesc.mSubmitDone = true;
-
         queuePresent(pGraphicsQueue, &presentDesc);
+
+        // Closing draw, preparing for next image in Swapchain
+
         flipProfiler();
 
         gFrameIndex = (gFrameIndex + 1) % gDataBufferCount;
@@ -774,20 +796,6 @@ public:
         depthStateDesc.mDepthWrite = true;
         depthStateDesc.mDepthFunc = CMP_GEQUAL;
 
-        PipelineDesc desc = {};
-        desc.mType = PIPELINE_TYPE_GRAPHICS;
-        GraphicsPipelineDesc& pipelineSettings = desc.mGraphicsDesc;
-        pipelineSettings.mPrimitiveTopo = PRIMITIVE_TOPO_TRI_LIST;
-        pipelineSettings.mRenderTargetCount = 1;
-        pipelineSettings.pDepthState = &depthStateDesc;
-        pipelineSettings.pColorFormats = &pSwapChain->ppRenderTargets[0]->mFormat;
-        pipelineSettings.mSampleCount = pSwapChain->ppRenderTargets[0]->mSampleCount;
-        pipelineSettings.mSampleQuality = pSwapChain->ppRenderTargets[0]->mSampleQuality;
-        pipelineSettings.mDepthStencilFormat = pDepthBuffer->mFormat;
-        pipelineSettings.pRootSignature = pRootSignature;
-        pipelineSettings.pRasterizerState = &sphereRasterizerStateDesc;
-        pipelineSettings.mVRFoveatedRendering = true;
-
         // layout and pipeline for skybox draw
         VertexLayout vertexLayout = {};
         vertexLayout.mBindingCount = 1;
@@ -798,11 +806,27 @@ public:
         vertexLayout.mAttribs[0].mBinding = 0;
         vertexLayout.mAttribs[0].mLocation = 0;
         vertexLayout.mAttribs[0].mOffset = 0;
-        pipelineSettings.pVertexLayout = &vertexLayout;
 
+        GraphicsPipelineDesc pipelineSettings = {};
+        pipelineSettings.pVertexLayout = &vertexLayout;
+        pipelineSettings.mPrimitiveTopo = PRIMITIVE_TOPO_TRI_LIST;
+        pipelineSettings.mRenderTargetCount = 1;
+        pipelineSettings.pDepthState = &depthStateDesc;
+        pipelineSettings.pColorFormats = &pSwapChain->ppRenderTargets[0]->mFormat;
+        pipelineSettings.mSampleCount = pSwapChain->ppRenderTargets[0]->mSampleCount;
+        pipelineSettings.mSampleQuality = pSwapChain->ppRenderTargets[0]->mSampleQuality;
+        pipelineSettings.mDepthStencilFormat = pDepthBuffer->mFormat;
+        pipelineSettings.pRootSignature = pRootSignature;
+        pipelineSettings.pRasterizerState = &sphereRasterizerStateDesc;
+        pipelineSettings.mVRFoveatedRendering = true;
         pipelineSettings.pDepthState = NULL;
         pipelineSettings.pRasterizerState = &rasterizerStateDesc;
         pipelineSettings.pShaderProgram = pSkyBoxDrawShader; //-V519
+
+        PipelineDesc desc = {};
+        desc.mType = PIPELINE_TYPE_GRAPHICS;
+        desc.mGraphicsDesc = pipelineSettings;
+
         addPipeline(pRenderer, &desc, &pSkyBoxDrawPipeline);
     }
 

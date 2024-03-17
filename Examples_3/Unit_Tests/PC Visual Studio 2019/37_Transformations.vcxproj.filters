@@ -75,7 +75,7 @@
     <ClInclude Include="..\src\37_Transformations\CastleApp.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\37_Transformations\Pipeline.h">
+    <ClInclude Include="..\src\37_Transformations\PipelineWrapper.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\37_Transformations\CmdRing.h">
@@ -109,6 +109,18 @@
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\37_Transformations\SemaphoreWrapper.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\IAppCommand.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\TextureSet.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\UniformSet.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\projections.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,6 +3,7 @@
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
 class Command;
+class SwapChainWrapper;
 
 class QueueWrapper
 {
@@ -12,6 +13,8 @@ public:
     void submit();
 
     void present();
+
+    void waitForIdleQueue(SwapChainWrapper*);
 
 private:
     Queue* pQueue;

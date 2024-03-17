@@ -35,14 +35,18 @@
     <ClInclude Include="..\src\37_Transformations\CmdRing.h" />
     <ClInclude Include="..\src\37_Transformations\CmdRingElement.h" />
     <ClInclude Include="..\src\37_Transformations\Command.h" />
+    <ClInclude Include="..\src\37_Transformations\IAppCommand.h" />
     <ClInclude Include="..\src\37_Transformations\IResourceSet.h" />
-    <ClInclude Include="..\src\37_Transformations\Pipeline.h" />
+    <ClInclude Include="..\src\37_Transformations\PipelineWrapper.h" />
+    <ClInclude Include="..\src\37_Transformations\projections.h" />
     <ClInclude Include="..\src\37_Transformations\QueueWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\RendererWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\RenderTargetWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\SemaphoreWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\Signature.h" />
     <ClInclude Include="..\src\37_Transformations\SwapChainWrapper.h" />
+    <ClInclude Include="..\src\37_Transformations\TextureSet.h" />
+    <ClInclude Include="..\src\37_Transformations\UniformSet.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{92429F3A-3940-490E-8DF6-0A51496819EA}</ProjectGuid>

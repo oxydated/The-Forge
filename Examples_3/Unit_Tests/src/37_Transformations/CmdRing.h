@@ -2,7 +2,7 @@
 
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
-class CmdRingElement;
+#include "CmdRingElement.h"
 
 class CmdRing
 {
@@ -11,7 +11,7 @@ public:
 
     void remove();
 
-    CmdRingElement getNextElement();
+    CmdRingElement* getNextElement();
 
     private:
 
