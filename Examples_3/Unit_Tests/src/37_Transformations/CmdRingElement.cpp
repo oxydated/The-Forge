@@ -2,7 +2,9 @@
 #include "RendererWrapper.h"
 #include "Command.h"
 
-void CmdRingElement::waitForFence() 
+CmdRingElement::CmdRingElement(GpuCmdRingElement gpuElem): elem(elem) {}
+
+void CmdRingElement::waitForFence()
 { 
     // Stall if CPU is running frames ahead of GPU
     FenceStatus fenceStatus;

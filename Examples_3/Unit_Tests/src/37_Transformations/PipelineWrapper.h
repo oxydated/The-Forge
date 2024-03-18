@@ -20,6 +20,6 @@ public:
     Pipeline* getPipeline();
 
 private:
-    Pipeline* pPipeline = NULL;
+    Pipeline* pipeline = NULL;
     Renderer* pRenderer = NULL;
 };

@@ -9,3 +9,5 @@ void UniformSet::update(uint32_t index, const void* source, size_t size)
     memcpy(skyboxViewProjCbv.pMappedData, source, size);
     endUpdateResource(&skyboxViewProjCbv);
 }
+
+DescriptorSet* UniformSet::getDescriptorSet() { return pDescriptorSetUniforms; }

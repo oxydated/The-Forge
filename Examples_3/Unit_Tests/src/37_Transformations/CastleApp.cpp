@@ -72,14 +72,16 @@ struct commandRecordObjects
     uint32_t             frameIndex;
 };
 
-void CastleApp::Draw() 
+void CastleApp::incrementFrameIndex() { frameIndex = (frameIndex + 1) % totalFrameBuffers; }
+
+void CastleApp::Draw()
 {
     // Wait for Idle Queue
     graphicsQueue->waitForIdleQueue(chain, this);
 
     // acquire next image index in Swapchain and get respective RenderTarget
 
-    acquiredRenderTarget acquiredImageFromSwapchain = chain->acquireNextImage();
+    acquiredRenderTarget acquiredImageFromSwapchain = chain->acquireNextImageFromSwapChain();
 
     // get element from CmdRing
 
@@ -142,8 +144,8 @@ void CastleApp::Draw()
 void CastleApp::commandsToRecord(void* data)
 {
     commandRecordObjects* pRecObjs = static_cast<commandRecordObjects*>(data);
-    float                 width = pRecObjs->renderTarget->getWidth();
-    float                 height = pRecObjs->renderTarget->getHeight();
+    uint32_t              width = pRecObjs->renderTarget->getWidth();
+    uint32_t              height = pRecObjs->renderTarget->getHeight();
 
     // if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
     //{
@@ -171,10 +173,10 @@ void CastleApp::commandsToRecord(void* data)
 
     //// draw skybox
     // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
-    pRecObjs->cmd->setViewPort(0, 0, width, height, 1, 1);
+    pRecObjs->cmd->setViewPort(0, 0, (float)width, (float)height, 1, 1);
 
     // cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
-    pRecObjs->cmd->setScissor(0, 0, (uint32_t)width, (uint32_t)height);
+    pRecObjs->cmd->setScissor(0, 0, width, height);
 
     // cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
     pRecObjs->cmd->BindPipeline(pRecObjs->pipeline);

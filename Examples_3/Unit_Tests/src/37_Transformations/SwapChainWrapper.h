@@ -14,7 +14,7 @@ struct acquiredRenderTarget
 class SwapChainWrapper
 {
 public:
-    acquiredRenderTarget acquireNextImage();
+    acquiredRenderTarget acquireNextImageFromSwapChain();
     Semaphore*           getImageAcquiredSemaphore();
     SwapChain*           getSwapChain();
 

@@ -4,6 +4,8 @@
 #include "TextureSet.h"
 #include "UniformSet.h"
 
+Command::Command(Cmd* pCmd): cmd(pCmd) {}
+
 void Command::BindRenderTargetAndLoad(RenderTargetWrapper* pRenderTarget, RenderTargetWrapper* pDepthBuffer)
 {
     BindRenderTargetsDesc bindRenderTargets = {};

@@ -5,11 +5,14 @@
 class RenderTargetWrapper
 {
 public:
-    float getWidth();
-    float getHeight();
+    RenderTargetWrapper(RenderTarget* rt);
+
+    uint32_t getWidth();
+
+    uint32_t getHeight();
 
     RenderTarget* getRenderTarget();
 
 private:
-    RenderTarget* pRenderTarget;
+    RenderTarget* renderTarget;
 };

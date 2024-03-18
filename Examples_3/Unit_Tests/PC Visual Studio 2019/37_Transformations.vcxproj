@@ -16,8 +16,12 @@
     <ClCompile Include="..\src\37_Transformations\CmdRing.cpp" />
     <ClCompile Include="..\src\37_Transformations\CmdRingElement.cpp" />
     <ClCompile Include="..\src\37_Transformations\Command.cpp" />
+    <ClCompile Include="..\src\37_Transformations\PipelineWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\QueueWrapper.cpp" />
+    <ClCompile Include="..\src\37_Transformations\RendererWrapper.cpp" />
+    <ClCompile Include="..\src\37_Transformations\RenderTargetWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\SwapChainWrapper.cpp" />
+    <ClCompile Include="..\src\37_Transformations\TextureSet.cpp" />
     <ClCompile Include="..\src\37_Transformations\UniformSet.cpp" />
   </ItemGroup>
   <ItemGroup>
