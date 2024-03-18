@@ -2,10 +2,11 @@
 
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
+class IApp;
+
 class RenderTargetWrapper
 {
 public:
-    RenderTargetWrapper(RenderTarget* rt);
 
     uint32_t getWidth();
 
@@ -13,6 +14,12 @@ public:
 
     RenderTarget* getRenderTarget();
 
+    static RenderTargetWrapper* createRenderTargetWrapper(IApp*);
+
+    static RenderTargetWrapper* createRenderTargetWrapper(RenderTarget*);
+
 private:
     RenderTarget* renderTarget;
+
+    RenderTargetWrapper(RenderTarget* rt);
 };

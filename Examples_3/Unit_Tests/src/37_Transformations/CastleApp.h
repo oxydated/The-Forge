@@ -8,6 +8,7 @@
 #include "CmdRing.h"
 #include "QueueWrapper.h"
 #include "SwapChainWrapper.h"
+#include "RenderTargetWrapper.h"
 //#include "IAppCommand.h"
 #include "projections.h"
 #include "UniformSet.h"
@@ -15,6 +16,7 @@
 #include "TextureSet.h"
 #include "UniformSet.h"
 #include "BufferResource.h"
+#include "Signature.h"
 
 class CastleApp: public IApp
 {
@@ -24,13 +26,15 @@ private:
 
     // wrappers
 
-    CmdRing           CommandRing;
-    QueueWrapper*     graphicsQueue = NULL;
-    SwapChainWrapper* chain = NULL;
-    PipelineWrapper*  skyBoxDrawPipeline;
-    TextureSet*       skyBoxTextures;
-    UniformSet*       skyUniforms;
-    BufferResource*   skyBoxVertexBuffer;
+    CmdRing              CommandRing;
+    QueueWrapper*        graphicsQueue = NULL;
+    SwapChainWrapper*    chain = NULL;
+    RenderTargetWrapper* depthBuffer;
+    PipelineWrapper*     skyBoxDrawPipeline;
+    TextureSet*          skyBoxTextures;
+    UniformSet*          skyUniforms;
+    BufferResource*      skyBoxVertexBuffer;
+    Signature*           rootSignature;
 
     // Buffers
 
@@ -43,54 +47,19 @@ private:
 
     void incrementFrameIndex();
 
-
-    //Queue* pGraphicsQueue = NULL;
-    //Renderer*  pRenderer = NULL;
-    //SwapChain* pSwapChain = NULL;
-
-    //// Depth Buffer
-    //RenderTarget* pDepthBuffer = NULL;
-
-    ////// Root Signature
-    ////RootSignature* pRootSignature = NULL;
-
-    //// texture Descriptor Set
-    //DescriptorSet* pDescriptorSetTexture = { NULL };
-
-    //// Uniform Descriptor Set
-    //DescriptorSet* pDescriptorSetUniforms = { NULL };
-
-    //bool addSwapChain();
-
-    //bool addDepthBuffer();
-
-    //void addDescriptorSets();
-
-    //void removeDescriptorSets();
-
-    //void addRootSignatures();
-
-    //void removeRootSignatures();
-
-    //void addShaders();
-
-    //void removeShaders();
-
-    //void addPipelines();
-
-    //void removePipelines();
-
-    //void prepareDescriptorSets();
-
-    //void initMarkers();
-
-    //void checkMarkers();
-
-    //void resetMarkers(Cmd* pCmd);
-
     static void commandsToRecord(void*);
 
-    void Draw() override;
+    virtual bool Init() override;
+    virtual void Exit() override;
+
+    virtual bool Load(ReloadDesc* pReloadDesc) override;
+    virtual void Unload(ReloadDesc* pReloadDesc) override;
+
+    virtual void Update(float deltaTime) override;
+
+    virtual void Draw() override;
+
+    virtual const char* GetName() override;
 };
 
 #endif

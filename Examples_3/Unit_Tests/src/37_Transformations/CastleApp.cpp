@@ -74,6 +74,90 @@ struct commandRecordObjects
 
 void CastleApp::incrementFrameIndex() { frameIndex = (frameIndex + 1) % totalFrameBuffers; }
 
+void CastleApp::Exit() {}
+
+bool CastleApp::Init()
+{
+    // FILE PATHS
+
+    // window and renderer setup
+
+    // check for init success
+    //if (!pRenderer)
+    //    return false;
+
+    // create Queue
+
+    // create GPUCmdRing
+
+    // create Image Acquisition - SwapChain semaphore
+
+    // init resource loader interface (The Forge stuff)
+    //initResourceLoaderInterface(pRenderer);
+
+    // Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet
+
+    // Creates Sampler (moved to Signature)
+
+    // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
+
+    // loads skybox uniform buffer
+
+    // more bread crumbs
+
+    // initialize UI and input
+
+    // start frameIndex
+
+    return true;
+}
+
+bool CastleApp::Load(ReloadDesc* pReloadDesc)
+{
+    if (pReloadDesc->mType & RELOAD_TYPE_SHADER)
+    {
+        /// Create Samplers
+        /// load shaders
+        /// create RootSignatures
+
+        rootSignature = new Signature({ "uSampler0" }, { "skybox.vert", "skybox.frag" });
+
+        /// create DescriptorSets
+        /// prepare DescriptorSets (that could be a single step)
+        skyBoxTextures = new TextureSet(rootSignature);
+        skyUniforms = new UniformSet(rootSignature);
+    }
+
+    if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
+    {
+        /// create SwapChain
+
+        chain = SwapChainWrapper::createSwapChainWrapper(graphicsQueue, this);
+        if (!chain)
+            return false;
+
+        /// create DepthBuffer
+
+        depthBuffer = RenderTargetWrapper::createRenderTargetWrapper(this);
+        if (!depthBuffer)
+            return false;
+    }
+
+    if (pReloadDesc->mType & (RELOAD_TYPE_SHADER | RELOAD_TYPE_RENDERTARGET))
+    {
+        /// create pipeline
+
+        //addPipelines();
+        skyBoxDrawPipeline = new PipelineWrapper(rootSignature, chain->getRenderTargetByIndex(0), depthBuffer);
+    }
+
+    // UI stuff
+
+    //loadUI(pReloadDesc);
+
+    return true;
+}
+
 void CastleApp::Draw()
 {
     // Wait for Idle Queue

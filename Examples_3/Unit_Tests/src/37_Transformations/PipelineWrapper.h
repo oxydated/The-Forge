@@ -6,14 +6,13 @@
 #include <string>
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
+class RenderTargetWrapper;
+class Signature;
+
 class PipelineWrapper
 {
 public:
-    PipelineWrapper(Renderer*, std::vector<std::pair<ShaderSemantic, TinyImageFormat>>, std::vector<Shader>, std::map<std::string, Sampler*>,
-             RasterizerStateDesc, DepthStateDesc);
-
-    PipelineWrapper(Renderer*, std::vector<std::pair<ShaderSemantic, TinyImageFormat>>, std::vector<Shader>, std::map<std::string, Sampler*>,
-             RasterizerStateDesc);
+    PipelineWrapper(Signature*, RenderTargetWrapper*, RenderTargetWrapper*);
 
     void remove();
 

@@ -4,6 +4,8 @@
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
 class RenderTargetWrapper;
+class QueueWrapper;
+class IApp;
 
 struct acquiredRenderTarget
 {
@@ -17,8 +19,13 @@ public:
     acquiredRenderTarget acquireNextImageFromSwapChain();
     Semaphore*           getImageAcquiredSemaphore();
     SwapChain*           getSwapChain();
+    RenderTargetWrapper* getRenderTargetByIndex(uint32_t index);
+    
+
+    static SwapChainWrapper* createSwapChainWrapper(QueueWrapper*, IApp*);
 
 private:
+    SwapChainWrapper(SwapChain*);
     SwapChain* swapChain = NULL;
     Semaphore* imageAcquiredSemaphore = NULL;
 };

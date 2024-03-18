@@ -8,7 +8,7 @@ acquiredRenderTarget SwapChainWrapper::acquireNextImageFromSwapChain()
     acquireNextImage(RendererWrapper::getRenderer(), swapChain, imageAcquiredSemaphore, NULL,
                      &(acquiredImageFromSwapChain.swapchainImageIndex));
     acquiredImageFromSwapChain.renderTarget =
-        new RenderTargetWrapper(swapChain->ppRenderTargets[acquiredImageFromSwapChain.swapchainImageIndex]);
+        RenderTargetWrapper::createRenderTargetWrapper(swapChain->ppRenderTargets[acquiredImageFromSwapChain.swapchainImageIndex]);
     return acquiredImageFromSwapChain;
 }
 

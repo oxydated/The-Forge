@@ -3,9 +3,13 @@
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 #include "../../../../Common_3/Resources/ResourceLoader/Interfaces/IResourceLoader.h"
 
+class Signature;
+
 class TextureSet
 {
 public:
+    TextureSet(Signature*);
+
     DescriptorSet* getDescriptorSet();
 
 private:

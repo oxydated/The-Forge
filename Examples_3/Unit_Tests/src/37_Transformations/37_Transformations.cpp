@@ -91,10 +91,10 @@ uint32_t     gFrameIndex = 0;
 int              gNumberOfSpherePoints;
 UniformBlockSky  gUniformDataSky;
 
+// UI global variables
+
 ICameraController* pCameraController = NULL;
-
 UIComponent* pGuiWindow = NULL;
-
 uint32_t gFontID = 0;
 
 /// Breadcrumb
@@ -204,15 +204,20 @@ public:
         settings.mD3D11Supported = true;
         settings.mGLESSupported = true;
         initRenderer(GetName(), &settings, &pRenderer);
+
+
         // check for init success
         if (!pRenderer)
             return false;
 
+
+        // create Queue
         QueueDesc queueDesc = {};
         queueDesc.mType = QUEUE_TYPE_GRAPHICS;
         queueDesc.mFlag = QUEUE_FLAG_INIT_MICROPROFILE;
         addQueue(pRenderer, &queueDesc, &pGraphicsQueue);
 
+        // create GPUCmdRing
         GpuCmdRingDesc cmdRingDesc = {};
         cmdRingDesc.pQueue = pGraphicsQueue;
         cmdRingDesc.mPoolCount = gDataBufferCount;
@@ -220,11 +225,13 @@ public:
         cmdRingDesc.mAddSyncPrimitives = true;
         addGpuCmdRing(pRenderer, &cmdRingDesc, &gGraphicsCmdRing);
 
+        // create Image Acquisition - SwapChain semaphore
         addSemaphore(pRenderer, &pImageAcquiredSemaphore);
 
+        // init resource loader interface (The Forge stuff)
         initResourceLoaderInterface(pRenderer);
 
-        // Loads Skybox Textures
+        // Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet
         for (int i = 0; i < 6; ++i)
         {
             TextureLoadDesc textureDesc = {};
@@ -235,16 +242,7 @@ public:
             addResource(&textureDesc, NULL);
         }
 
-        SamplerDesc samplerDesc = { FILTER_LINEAR,
-                                    FILTER_LINEAR,
-                                    MIPMAP_MODE_NEAREST,
-                                    ADDRESS_MODE_CLAMP_TO_EDGE,
-                                    ADDRESS_MODE_CLAMP_TO_EDGE,
-                                    ADDRESS_MODE_CLAMP_TO_EDGE };
-        addSampler(pRenderer, &samplerDesc, &pSamplerSkyBox);
-
-        // Loads Skybox vertex buffer
-
+        // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
         uint64_t       skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
         BufferLoadDesc skyboxVbDesc = {};
         skyboxVbDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_VERTEX_BUFFER;
@@ -255,7 +253,6 @@ public:
         addResource(&skyboxVbDesc, NULL);
 
         // loads skybox uniform buffer
-
         BufferLoadDesc ubDesc = {};
         ubDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         ubDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_CPU_TO_GPU;
@@ -269,154 +266,27 @@ public:
             addResource(&ubDesc, NULL);
         }
 
+        // more bread crumbs
         if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
         {
             // Initialize breadcrumb buffer to write markers in it.
             initMarkers();
         }
 
-        // Load fonts
-        FontDesc font = {};
-        font.pFontPath = "TitilliumText/TitilliumText-Bold.otf";
-        fntDefineFonts(&font, 1, &gFontID);
+#ifdef __no_UI__
 
-        FontSystemDesc fontRenderDesc = {};
-        fontRenderDesc.pRenderer = pRenderer;
-        if (!initFontSystem(&fontRenderDesc))
-            return false; // report?
-
-        // Initialize Forge User Interface Rendering
-        UserInterfaceDesc uiRenderDesc = {};
-        uiRenderDesc.pRenderer = pRenderer;
-        initUserInterface(&uiRenderDesc);
-
-        /************************************************************************/
-        // GUI
-        /************************************************************************/
-        UIComponentDesc guiDesc = {};
-        guiDesc.mStartPosition = vec2(mSettings.mWidth * 0.01f, mSettings.mHeight * 0.2f);
-        uiCreateComponent(GetName(), &guiDesc, &pGuiWindow);
-
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        if (!initUI())
         {
-            ButtonWidget   crashButton;
-            UIWidget*      pCrashButton = uiCreateComponentWidget(pGuiWindow, "Simulate crash", &crashButton, WIDGET_TYPE_BUTTON);
-            WidgetCallback crashCallback = [](void* pUserData) { bSimulateCrash = true; };
-            uiSetWidgetOnEditedCallback(pCrashButton, nullptr, crashCallback);
-            REGISTER_LUA_WIDGET(pCrashButton);
+            return false;
+        }
+#else
+
+        if (!initUIAlternative())
+        {
+            return false;
         }
 
-        const uint32_t numScripts = TF_ARRAY_COUNT(gWindowTestScripts);
-        LuaScriptDesc  scriptDescs[numScripts] = {};
-        for (uint32_t i = 0; i < numScripts; ++i)
-            scriptDescs[i].pScriptFileName = gWindowTestScripts[i];
-        DEFINE_LUA_SCRIPTS(scriptDescs, numScripts);
-
-        waitForAllResourceLoads();
-
-        CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f };
-        vec3                   camPos{ 48.0f, 48.0f, 20.0f };
-        vec3                   lookAt{ vec3(0) };
-
-        pCameraController = initFpsCameraController(camPos, lookAt);
-
-        pCameraController->setMotionParameters(cmp);
-
-        InputSystemDesc inputDesc = {};
-        inputDesc.pRenderer = pRenderer;
-        inputDesc.pWindow = pWindow;
-        inputDesc.pJoystickTexture = "circlepad.tex";
-        if (!initInputSystem(&inputDesc))
-            return false;
-
-        // App Actions
-        InputActionDesc actionDesc = { DefaultInputActions::DUMP_PROFILE_DATA,
-                                       [](InputActionContext* ctx)
-                                       {
-                                           dumpProfileData(((Renderer*)ctx->pUserData)->pName);
-                                           return true;
-                                       },
-                                       pRenderer };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::TOGGLE_FULLSCREEN,
-                       [](InputActionContext* ctx)
-                       {
-                           WindowDesc* winDesc = ((IApp*)ctx->pUserData)->pWindow;
-                           if (winDesc->fullScreen)
-                               winDesc->borderlessWindow
-                                   ? setBorderless(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect))
-                                   : setWindowed(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect));
-                           else
-                               setFullscreen(winDesc);
-                           return true;
-                       },
-                       this };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::EXIT, [](InputActionContext* ctx)
-                       {
-                           requestShutdown();
-                           return true;
-                       } };
-        addInputAction(&actionDesc);
-        InputActionCallback onAnyInput = [](InputActionContext* ctx)
-        {
-            if (ctx->mActionId > UISystemInputActions::UI_ACTION_START_ID_)
-            {
-                uiOnInput(ctx->mActionId, ctx->mBool, ctx->pPosition, &ctx->mFloat2);
-            }
-
-            return true;
-        };
-
-        typedef bool (*CameraInputHandler)(InputActionContext * ctx, DefaultInputActions::DefaultInputAction action);
-        static CameraInputHandler onCameraInput = [](InputActionContext* ctx, DefaultInputActions::DefaultInputAction action)
-        {
-            if (*(ctx->pCaptured))
-            {
-                float2 delta = uiIsFocused() ? float2(0.f, 0.f) : ctx->mFloat2;
-                switch (action)
-                {
-                case DefaultInputActions::ROTATE_CAMERA:
-                    pCameraController->onRotate(delta);
-                    break;
-                case DefaultInputActions::TRANSLATE_CAMERA:
-                    pCameraController->onMove(delta);
-                    break;
-                case DefaultInputActions::TRANSLATE_CAMERA_VERTICAL:
-                    pCameraController->onMoveY(delta[0]);
-                    break;
-                default:
-                    break;
-                }
-            }
-            return true;
-        };
-        actionDesc = { DefaultInputActions::CAPTURE_INPUT,
-                       [](InputActionContext* ctx)
-                       {
-                           setEnableCaptureInput(!uiIsFocused() && INPUT_ACTION_PHASE_CANCELED != ctx->mPhase);
-                           return true;
-                       },
-                       NULL };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::ROTATE_CAMERA,
-                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::ROTATE_CAMERA); }, NULL };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA,
-                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA); }, NULL };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA_VERTICAL,
-                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA_VERTICAL); }, NULL };
-        addInputAction(&actionDesc);
-        actionDesc = { DefaultInputActions::RESET_CAMERA, [](InputActionContext* ctx)
-                       {
-                           if (!uiWantTextInput())
-                               pCameraController->resetView();
-                           return true;
-                       } };
-        addInputAction(&actionDesc);
-        GlobalInputActionDesc globalInputActionDesc = { GlobalInputActionDesc::ANY_BUTTON_ACTION, onAnyInput, this };
-        setGlobalInputAction(&globalInputActionDesc);
+#endif
 
         gFrameIndex = 0;
 
@@ -425,16 +295,14 @@ public:
 
     void Exit()
     {
-        exitInputSystem();
-
-        exitCameraController(pCameraController);
-
-        exitUserInterface();
-
-        exitFontSystem();
+#ifdef __no_UI__
+        ExitUI();
+#else
+        ExitUIAlternative();
+#endif
 
         // Exit profile
-        exitProfiler();
+        //exitProfiler();
 
         if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
         {
@@ -468,44 +336,48 @@ public:
     {
         if (pReloadDesc->mType & RELOAD_TYPE_SHADER)
         {
+            // Creates Sampler
+            SamplerDesc samplerDesc = { FILTER_LINEAR,
+                                        FILTER_LINEAR,
+                                        MIPMAP_MODE_NEAREST,
+                                        ADDRESS_MODE_CLAMP_TO_EDGE,
+                                        ADDRESS_MODE_CLAMP_TO_EDGE,
+                                        ADDRESS_MODE_CLAMP_TO_EDGE };
+            addSampler(pRenderer, &samplerDesc, &pSamplerSkyBox);
+
+            /// load shaders
             addShaders();
+
+            /// create RootSignatures
             addRootSignatures();
+
+            /// create DescriptorSets
             addDescriptorSets();
+
+            /// prepare DescriptorSets (that could be a single step)
             prepareDescriptorSets();
         }
 
         if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
         {
+            /// create SwapChain
             if (!addSwapChain())
                 return false;
 
+            /// create DepthBuffer
             if (!addDepthBuffer())
                 return false;
         }
 
         if (pReloadDesc->mType & (RELOAD_TYPE_SHADER | RELOAD_TYPE_RENDERTARGET))
         {
+            /// create pipeline
             addPipelines();
         }
 
-
         // UI stuff
 
-        UserInterfaceLoadDesc uiLoad = {};
-        uiLoad.mColorFormat = pSwapChain->ppRenderTargets[0]->mFormat;
-        uiLoad.mHeight = mSettings.mHeight;
-        uiLoad.mWidth = mSettings.mWidth;
-        uiLoad.mLoadType = pReloadDesc->mType;
-        loadUserInterface(&uiLoad);
-
-        FontSystemLoadDesc fontLoad = {};
-        fontLoad.mColorFormat = pSwapChain->ppRenderTargets[0]->mFormat;
-        fontLoad.mHeight = mSettings.mHeight;
-        fontLoad.mWidth = mSettings.mWidth;
-        fontLoad.mLoadType = pReloadDesc->mType;
-        loadFontSystem(&fontLoad);
-
-        initScreenshotInterface(pRenderer, pGraphicsQueue);
+        loadUI(pReloadDesc);
 
         return true;
     }
@@ -540,9 +412,12 @@ public:
 
     void Update(float deltaTime)
     {
-        updateInputSystem(deltaTime, mSettings.mWidth, mSettings.mHeight);
+#ifdef __no_UI__
+        UpdateUI(deltaTime);
+#else
+        UpdateUI(deltaTime);
+#endif
 
-        pCameraController->update(deltaTime);
         /************************************************************************/
         // Scene Update
         /************************************************************************/
@@ -692,7 +567,7 @@ public:
 
         // Closing draw, preparing for next image in Swapchain
 
-        flipProfiler();
+        //flipProfiler();
 
         gFrameIndex = (gFrameIndex + 1) % gDataBufferCount;
     }
@@ -916,6 +791,342 @@ public:
         {
             removeResource(pMarkerBuffer[i]);
         }
+    }
+
+    bool initUIAlternative() {
+        // Load fonts
+        FontDesc font = {};
+        font.pFontPath = "TitilliumText/TitilliumText-Bold.otf";
+        fntDefineFonts(&font, 1, &gFontID);
+
+        FontSystemDesc fontRenderDesc = {};
+        fontRenderDesc.pRenderer = pRenderer;
+        if (!initFontSystem(&fontRenderDesc))
+            return false; // report?
+
+        // Initialize Forge User Interface Rendering
+        UserInterfaceDesc uiRenderDesc = {};
+        uiRenderDesc.pRenderer = pRenderer;
+        initUserInterface(&uiRenderDesc);
+
+        // Camera setup
+        if (!CameraSetup())
+            return false;
+
+        waitForAllResourceLoads();
+
+        return true;
+    }
+
+    bool initUI()
+    {
+        // Load fonts
+        FontDesc font = {};
+        font.pFontPath = "TitilliumText/TitilliumText-Bold.otf";
+        fntDefineFonts(&font, 1, &gFontID);
+
+        FontSystemDesc fontRenderDesc = {};
+        fontRenderDesc.pRenderer = pRenderer;
+        if (!initFontSystem(&fontRenderDesc))
+            return false; // report?
+
+        // Initialize Forge User Interface Rendering
+        UserInterfaceDesc uiRenderDesc = {};
+        uiRenderDesc.pRenderer = pRenderer;
+        initUserInterface(&uiRenderDesc);
+
+        /************************************************************************/
+        // GUI
+        /************************************************************************/
+        UIComponentDesc guiDesc = {};
+        guiDesc.mStartPosition = vec2(mSettings.mWidth * 0.01f, mSettings.mHeight * 0.2f);
+        uiCreateComponent(GetName(), &guiDesc, &pGuiWindow);
+
+        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
+        {
+            ButtonWidget   crashButton;
+            UIWidget*      pCrashButton = uiCreateComponentWidget(pGuiWindow, "Simulate crash", &crashButton, WIDGET_TYPE_BUTTON);
+            WidgetCallback crashCallback = [](void* pUserData) { bSimulateCrash = true; };
+            uiSetWidgetOnEditedCallback(pCrashButton, nullptr, crashCallback);
+            REGISTER_LUA_WIDGET(pCrashButton);
+        }
+
+        const uint32_t numScripts = TF_ARRAY_COUNT(gWindowTestScripts);
+        LuaScriptDesc  scriptDescs[numScripts] = {};
+        for (uint32_t i = 0; i < numScripts; ++i)
+            scriptDescs[i].pScriptFileName = gWindowTestScripts[i];
+        DEFINE_LUA_SCRIPTS(scriptDescs, numScripts);
+
+        waitForAllResourceLoads();
+
+        CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f };
+        vec3                   camPos{ 48.0f, 48.0f, 20.0f };
+        vec3                   lookAt{ vec3(0) };
+
+        pCameraController = initFpsCameraController(camPos, lookAt);
+
+        pCameraController->setMotionParameters(cmp);
+
+        InputSystemDesc inputDesc = {};
+        inputDesc.pRenderer = pRenderer;
+        inputDesc.pWindow = pWindow;
+        inputDesc.pJoystickTexture = "circlepad.tex";
+        if (!initInputSystem(&inputDesc))
+            return false;
+
+        // App Actions
+        InputActionDesc actionDesc = { DefaultInputActions::DUMP_PROFILE_DATA,
+                                       [](InputActionContext* ctx)
+                                       {
+                                           dumpProfileData(((Renderer*)ctx->pUserData)->pName);
+                                           return true;
+                                       },
+                                       pRenderer };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TOGGLE_FULLSCREEN,
+                       [](InputActionContext* ctx)
+                       {
+                           WindowDesc* winDesc = ((IApp*)ctx->pUserData)->pWindow;
+                           if (winDesc->fullScreen)
+                               winDesc->borderlessWindow
+                                   ? setBorderless(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect))
+                                   : setWindowed(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect));
+                           else
+                               setFullscreen(winDesc);
+                           return true;
+                       },
+                       this };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::EXIT, [](InputActionContext* ctx)
+                       {
+                           requestShutdown();
+                           return true;
+                       } };
+        addInputAction(&actionDesc);
+        InputActionCallback onAnyInput = [](InputActionContext* ctx)
+        {
+            if (ctx->mActionId > UISystemInputActions::UI_ACTION_START_ID_)
+            {
+                uiOnInput(ctx->mActionId, ctx->mBool, ctx->pPosition, &ctx->mFloat2);
+            }
+
+            return true;
+        };
+
+        typedef bool              (*CameraInputHandler)(InputActionContext* ctx, DefaultInputActions::DefaultInputAction action);
+        static CameraInputHandler onCameraInput = [](InputActionContext* ctx, DefaultInputActions::DefaultInputAction action)
+        {
+            if (*(ctx->pCaptured))
+            {
+                float2 delta = uiIsFocused() ? float2(0.f, 0.f) : ctx->mFloat2;
+                switch (action)
+                {
+                case DefaultInputActions::ROTATE_CAMERA:
+                    pCameraController->onRotate(delta);
+                    break;
+                case DefaultInputActions::TRANSLATE_CAMERA:
+                    pCameraController->onMove(delta);
+                    break;
+                case DefaultInputActions::TRANSLATE_CAMERA_VERTICAL:
+                    pCameraController->onMoveY(delta[0]);
+                    break;
+                default:
+                    break;
+                }
+            }
+            return true;
+        };
+        actionDesc = { DefaultInputActions::CAPTURE_INPUT,
+                       [](InputActionContext* ctx)
+                       {
+                           setEnableCaptureInput(!uiIsFocused() && INPUT_ACTION_PHASE_CANCELED != ctx->mPhase);
+                           return true;
+                       },
+                       NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::ROTATE_CAMERA,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::ROTATE_CAMERA); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA_VERTICAL,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA_VERTICAL); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::RESET_CAMERA, [](InputActionContext* ctx)
+                       {
+                           if (!uiWantTextInput())
+                               pCameraController->resetView();
+                           return true;
+                       } };
+        addInputAction(&actionDesc);
+        GlobalInputActionDesc globalInputActionDesc = { GlobalInputActionDesc::ANY_BUTTON_ACTION, onAnyInput, this };
+        setGlobalInputAction(&globalInputActionDesc);
+
+        return true;
+
+    }
+
+    void ExitUI() 
+    {
+        exitInputSystem();
+
+        exitCameraController(pCameraController);
+
+        exitUserInterface();
+
+        exitFontSystem();
+    }
+
+    void ExitUIAlternative()
+    {
+        removeCamera();
+
+        exitUserInterface();
+
+        exitFontSystem();
+    }
+
+    void UpdateUI(float deltaTime)
+    {
+        updateInputSystem(deltaTime, mSettings.mWidth, mSettings.mHeight);
+
+        pCameraController->update(deltaTime);
+    }
+
+    bool CameraSetup()
+    {
+        // Initialize camera controller
+        CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f };
+        vec3                   camPos{ 48.0f, 48.0f, 20.0f };
+        vec3                   lookAt{ vec3(0) };
+
+        pCameraController = initFpsCameraController(camPos, lookAt);
+        pCameraController->setMotionParameters(cmp);
+
+        InputSystemDesc inputDesc = {};
+        inputDesc.pRenderer = pRenderer;
+        inputDesc.pWindow = pWindow;
+        inputDesc.pJoystickTexture = "circlepad.tex";
+        if (!initInputSystem(&inputDesc))
+            return false;
+
+        // App Actions
+        InputActionDesc actionDesc = { DefaultInputActions::DUMP_PROFILE_DATA,
+                                       [](InputActionContext* ctx)
+                                       {
+                                           dumpProfileData(((Renderer*)ctx->pUserData)->pName);
+                                           return true;
+                                       },
+                                       pRenderer };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TOGGLE_FULLSCREEN,
+                       [](InputActionContext* ctx)
+                       {
+                           WindowDesc* winDesc = ((IApp*)ctx->pUserData)->pWindow;
+                           if (winDesc->fullScreen)
+                               winDesc->borderlessWindow
+                                   ? setBorderless(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect))
+                                   : setWindowed(winDesc, getRectWidth(&winDesc->clientRect), getRectHeight(&winDesc->clientRect));
+                           else
+                               setFullscreen(winDesc);
+                           return true;
+                       },
+                       this };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::EXIT, [](InputActionContext* ctx)
+                       {
+                           requestShutdown();
+                           return true;
+                       } };
+        addInputAction(&actionDesc);
+        InputActionCallback onAnyInput = [](InputActionContext* ctx)
+        {
+            if (ctx->mActionId > UISystemInputActions::UI_ACTION_START_ID_)
+            {
+                uiOnInput(ctx->mActionId, ctx->mBool, ctx->pPosition, &ctx->mFloat2);
+            }
+
+            return true;
+        };
+
+        typedef bool              (*CameraInputHandler)(InputActionContext* ctx, DefaultInputActions::DefaultInputAction action);
+        static CameraInputHandler onCameraInput = [](InputActionContext* ctx, DefaultInputActions::DefaultInputAction action)
+        {
+            if (*(ctx->pCaptured))
+            {
+                float2 delta = uiIsFocused() ? float2(0.f, 0.f) : ctx->mFloat2;
+                switch (action)
+                {
+                case DefaultInputActions::ROTATE_CAMERA:
+                    pCameraController->onRotate(delta);
+                    break;
+                case DefaultInputActions::TRANSLATE_CAMERA:
+                    pCameraController->onMove(delta);
+                    break;
+                case DefaultInputActions::TRANSLATE_CAMERA_VERTICAL:
+                    pCameraController->onMoveY(delta[0]);
+                    break;
+                default:
+                    break;
+                }
+            }
+            return true;
+        };
+        actionDesc = { DefaultInputActions::CAPTURE_INPUT,
+                       [](InputActionContext* ctx)
+                       {
+                           setEnableCaptureInput(!uiIsFocused() && INPUT_ACTION_PHASE_CANCELED != ctx->mPhase);
+                           return true;
+                       },
+                       NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::ROTATE_CAMERA,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::ROTATE_CAMERA); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::TRANSLATE_CAMERA_VERTICAL,
+                       [](InputActionContext* ctx) { return onCameraInput(ctx, DefaultInputActions::TRANSLATE_CAMERA_VERTICAL); }, NULL };
+        addInputAction(&actionDesc);
+        actionDesc = { DefaultInputActions::RESET_CAMERA, [](InputActionContext* ctx)
+                       {
+                           if (!uiWantTextInput())
+                               pCameraController->resetView();
+                           return true;
+                       } };
+        addInputAction(&actionDesc);
+        GlobalInputActionDesc globalInputActionDesc = { GlobalInputActionDesc::ANY_BUTTON_ACTION, onAnyInput, this };
+        setGlobalInputAction(&globalInputActionDesc);
+
+        return true;
+    }
+
+    void removeCamera()
+    {
+        exitInputSystem();
+
+        exitCameraController(pCameraController);
+    }
+
+    void loadUI(ReloadDesc* pReloadDesc)
+    {
+        UserInterfaceLoadDesc uiLoad = {};
+        uiLoad.mColorFormat = pSwapChain->ppRenderTargets[0]->mFormat;
+        uiLoad.mHeight = mSettings.mHeight;
+        uiLoad.mWidth = mSettings.mWidth;
+        uiLoad.mLoadType = pReloadDesc->mType;
+        loadUserInterface(&uiLoad);
+
+        FontSystemLoadDesc fontLoad = {};
+        fontLoad.mColorFormat = pSwapChain->ppRenderTargets[0]->mFormat;
+        fontLoad.mHeight = mSettings.mHeight;
+        fontLoad.mWidth = mSettings.mWidth;
+        fontLoad.mLoadType = pReloadDesc->mType;
+        loadFontSystem(&fontLoad);
+
+        initScreenshotInterface(pRenderer, pGraphicsQueue);
     }
 };
 
