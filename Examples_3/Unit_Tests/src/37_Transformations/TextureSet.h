@@ -5,4 +5,9 @@
 
 class TextureSet
 {
+public:
+    DescriptorSet* getDescriptorSet();
+
+private:
+    DescriptorSet* pDescriptorSetTexture;
 };

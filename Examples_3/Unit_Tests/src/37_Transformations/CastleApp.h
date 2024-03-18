@@ -24,14 +24,24 @@ private:
 
     // wrappers
 
-    CmdRing* CommandRing = NULL;
-    QueueWrapper* graphicsQueue = NULL;
+    CmdRing           CommandRing;
+    QueueWrapper*     graphicsQueue = NULL;
     SwapChainWrapper* chain = NULL;
-    UniformSet*       skyUniform;
     PipelineWrapper*  skyBoxDrawPipeline;
     TextureSet*       skyBoxTextures;
     UniformSet*       skyUniforms;
     BufferResource*   skyBoxVertexBuffer;
+
+    // Buffers
+
+    std::vector<Buffer*> vertexBuffers;
+
+    // frame couting
+
+    int frameIndex = 0;
+    int totalFrameBuffers;
+
+    void incrementFrameIndex();
 
 
     //Queue* pGraphicsQueue = NULL;

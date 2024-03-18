@@ -4,18 +4,19 @@
 
 class Command;
 class SwapChainWrapper;
+class IApp;
 
 class QueueWrapper
 {
 public:
     QueueWrapper();
 
-    void submit();
+    void submit(Command* command, Fence* signalFence, Semaphore** waitSemaphores, Semaphore** signalSemaphores);
 
-    void present();
+    void present(uint32_t swapchainImageIndex, SwapChainWrapper* chain, uint32_t waitSemaphoresCount, Semaphore** waitSemaphores);
 
-    void waitForIdleQueue(SwapChainWrapper*);
+    void waitForIdleQueue(SwapChainWrapper* chain, IApp* app);
 
 private:
-    Queue* pQueue;
+    Queue* queue;
 };

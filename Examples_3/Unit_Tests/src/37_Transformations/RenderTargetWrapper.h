@@ -7,4 +7,9 @@ class RenderTargetWrapper
 public:
     float getWidth();
     float getHeight();
+
+    RenderTarget* getRenderTarget();
+
+private:
+    RenderTarget* pRenderTarget;
 };

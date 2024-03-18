@@ -65,28 +65,29 @@ struct commandRecordObjects
     Command*             cmd;
     RenderTargetWrapper* renderTarget;
     RenderTargetWrapper* depthBuffer;
-    PipelineWrapper* pipeline;
-    TextureSet* textures;
-    UniformSet* uniforms;
-    BufferResource* vertexBuffer;
+    PipelineWrapper*     pipeline;
+    TextureSet*          textures;
+    UniformSet*          uniforms;
+    Buffer**             vertexBuffer;
+    uint32_t             frameIndex;
 };
 
 void CastleApp::Draw() 
 {
     // Wait for Idle Queue
-    graphicsQueue->waitForIdleQueue(chain);
+    graphicsQueue->waitForIdleQueue(chain, this);
 
     // acquire next image index in Swapchain and get respective RenderTarget
 
-    RenderTargetWrapper* pRenderTarget = chain->acquireNextImage();
+    acquiredRenderTarget acquiredImageFromSwapchain = chain->acquireNextImage();
 
     // get element from CmdRing
 
-    CmdRingElement* elem = CommandRing->getNextElement();
+    CmdRingElement elem = CommandRing.getNextElement(true, 1);
 
     // Stall if CPU is running "gDataBufferCount" frames ahead of GPU
 
-    elem->waitForFence();
+    elem.waitForFence();
 
     //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
     //{
@@ -96,42 +97,53 @@ void CastleApp::Draw()
 
     // update uniform
 
-    skyUniform->update(&skyUniformHostBlock, sizeof(UniformBlockSky));
+    skyUniforms->update(frameIndex, &skyUniformHostBlock, sizeof(UniformBlockSky));
 
     // Reset cmd pool for this frame
 
-    elem->resetCommandPool();
+    elem.resetCommandPool();
 
     // record command buffer
 
-    Command* cmd = elem->getCommandByIndex(0);
+    Command* cmd = elem.getCommandByIndex(0);
 
-    cmd->recordCommand(&CastleApp::commandsToRecord);
+    commandRecordObjects recObjs = {};
+
+    recObjs.cmd = cmd;
+    recObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
+    recObjs.depthBuffer;
+    recObjs.pipeline = skyBoxDrawPipeline;
+    recObjs.textures = skyBoxTextures;
+    recObjs.uniforms = skyUniforms;
+    recObjs.vertexBuffer = vertexBuffers.data();
+    recObjs.frameIndex = frameIndex;
+
+    cmd->recordCommand(&CastleApp::commandsToRecord, &recObjs);
 
     // simply record the screen cleaning command
 
     // draw skybox
 
     // Queue Submit
-    graphicsQueue->submit();
+
+    Semaphore* imageAcquiredSemaphore = chain->getImageAcquiredSemaphore();
+    Semaphore* waitSemaphore = elem.getSemaphore();
+
+    graphicsQueue->submit(cmd, elem.getFence(), &imageAcquiredSemaphore, &waitSemaphore);
 
     // Queue present
-    graphicsQueue->present();
+    // &elem.pSemaphore wait
+    graphicsQueue->present(acquiredImageFromSwapchain.swapchainImageIndex, chain, 1, &waitSemaphore);
 
     // Closing draw, preparing for next image in Swapchain
+    incrementFrameIndex();
 }
-#else
-void CastleApp::Draw()
-{
-}
-
-#endif
 
 void CastleApp::commandsToRecord(void* data)
 {
-    commandRecordObjects* recObjs = static_cast<commandRecordObjects*>(data);
-    float                 width = recObjs->renderTarget->getWidth();
-    float                 height = recObjs->renderTarget->getHeight();
+    commandRecordObjects* pRecObjs = static_cast<commandRecordObjects*>(data);
+    float                 width = pRecObjs->renderTarget->getWidth();
+    float                 height = pRecObjs->renderTarget->getHeight();
 
     // if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
     //{
@@ -143,8 +155,8 @@ void CastleApp::commandsToRecord(void* data)
     //     { pRenderTarget, RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET },
     // };
     // cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
-    RenderTargetWrapperBarrier barrier = { recObjs->renderTarget, RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET };
-    recObjs->cmd->ResourceBarrier({ &barrier });
+    RenderTargetBarrier barriers[] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET };
+    pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 
     //// simply record the screen cleaning command
 
@@ -153,28 +165,33 @@ void CastleApp::commandsToRecord(void* data)
     // bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_CLEAR };
     // bindRenderTargets.mDepthStencil = { pDepthBuffer, LOAD_ACTION_CLEAR };
     // cmdBindRenderTargets(cmd, &bindRenderTargets);
-    recObjs->cmd->BindRenderTargetAndClean(recObjs->renderTarget, recObjs->depthBuffer);
+    pRecObjs->cmd->BindRenderTargetAndClean(pRecObjs->renderTarget, pRecObjs->depthBuffer);
 
     // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
-    recObjs->cmd->setViewPort(0, 0, width, height, 0, 1);
-
-    // cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
-    recObjs->cmd->setScissor(0, 0, width, height);
-
-    // const uint32_t skyboxVbStride = sizeof(float) * 4;
 
     //// draw skybox
     // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
+    pRecObjs->cmd->setViewPort(0, 0, width, height, 1, 1);
+
+    // cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
+    pRecObjs->cmd->setScissor(0, 0, (uint32_t)width, (uint32_t)height);
 
     // cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
+    pRecObjs->cmd->BindPipeline(pRecObjs->pipeline);
 
     // cmdBindDescriptorSet(cmd, 0, pDescriptorSetTexture);
+    pRecObjs->cmd->BindTextureSet(pRecObjs->textures, 0);
 
     // cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 0, pDescriptorSetUniforms);
+    pRecObjs->cmd->BindUniformSet(pRecObjs->uniforms, pRecObjs->frameIndex * 2 + 0);
+
+    const uint32_t skyboxVbStride = sizeof(float) * 4;
 
     // cmdBindVertexBuffer(cmd, 1, &pSkyBoxVertexBuffer, &skyboxVbStride, NULL);
+    pRecObjs->cmd->BindVertexBuffer(1, pRecObjs->vertexBuffer, &skyboxVbStride, NULL);
 
     // cmdDraw(cmd, 36, 0);
+    pRecObjs->cmd->draw(36, 0);
 
     // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
 
@@ -182,11 +199,22 @@ void CastleApp::commandsToRecord(void* data)
     // bindRenderTargets.mRenderTargetCount = 1;
     // bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_LOAD };
     // cmdBindRenderTargets(cmd, &bindRenderTargets);
+    pRecObjs->cmd->BindRenderTargetAndLoad(pRecObjs->renderTarget, NULL);
 
     // cmdDrawUserInterface(cmd);
 
     // cmdBindRenderTargets(cmd, NULL);
+    pRecObjs->cmd->UnbindRenderTarget();
 
     // barriers[0] = { pRenderTarget, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
     // cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
+    barriers[0] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
+    pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 }
+
+#else
+void CastleApp::Draw()
+{
+}
+
+#endif

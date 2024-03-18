@@ -626,14 +626,12 @@ public:
         bindRenderTargets.mDepthStencil = { pDepthBuffer, LOAD_ACTION_CLEAR };
         cmdBindRenderTargets(cmd, &bindRenderTargets);
 
-        cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
-
-        cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
-
-        const uint32_t skyboxVbStride = sizeof(float) * 4;
+        //cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
 
         // draw skybox
         cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
+
+        cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
 
         cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
 
@@ -641,19 +639,21 @@ public:
 
         cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 0, pDescriptorSetUniforms);
 
+        const uint32_t skyboxVbStride = sizeof(float) * 4;
+
         cmdBindVertexBuffer(cmd, 1, &pSkyBoxVertexBuffer, &skyboxVbStride, NULL);
 
         cmdDraw(cmd, 36, 0);
 
 
-        cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
+        //cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
 
         bindRenderTargets = {};
         bindRenderTargets.mRenderTargetCount = 1;
         bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_LOAD };
         cmdBindRenderTargets(cmd, &bindRenderTargets);
 
-        cmdDrawUserInterface(cmd);
+        //cmdDrawUserInterface(cmd);
 
         cmdBindRenderTargets(cmd, NULL);
 

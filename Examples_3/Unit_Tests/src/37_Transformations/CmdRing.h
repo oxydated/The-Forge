@@ -11,9 +11,8 @@ public:
 
     void remove();
 
-    CmdRingElement* getNextElement();
+    CmdRingElement getNextElement(bool cyclePool, uint32_t cmdCount);
 
-    private:
-
-
+private:
+    GpuCmdRing cmdRing;
 };

@@ -15,9 +15,9 @@ public:
     PipelineWrapper(Renderer*, std::vector<std::pair<ShaderSemantic, TinyImageFormat>>, std::vector<Shader>, std::map<std::string, Sampler*>,
              RasterizerStateDesc);
 
-    void bind(Cmd*);
-
     void remove();
+
+    Pipeline* getPipeline();
 
 private:
     Pipeline* pPipeline = NULL;

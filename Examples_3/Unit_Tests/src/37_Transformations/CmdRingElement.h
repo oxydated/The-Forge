@@ -14,9 +14,13 @@ public:
 
     void resetCommandPool();
 
+    Semaphore* getSemaphore();
+
     Command* getCommandByIndex(uint32_t index);
 
+    Fence* getFence();
+
 private:
-    GpuCmdRingElement element;
+    GpuCmdRingElement elem;
 
 };
