@@ -148,8 +148,8 @@ const float gSkyBoxPoints[] = {
     -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
 };
 
-static unsigned char gPipelineStatsCharArray[2048] = {};
-static bstring       gPipelineStats = bfromarr(gPipelineStatsCharArray);
+//static unsigned char gPipelineStatsCharArray[2048] = {};
+//static bstring       gPipelineStats = bfromarr(gPipelineStatsCharArray);
 
 void reloadRequest(void*)
 {
@@ -225,22 +225,8 @@ public:
         cmdRingDesc.mAddSyncPrimitives = true;
         addGpuCmdRing(pRenderer, &cmdRingDesc, &gGraphicsCmdRing);
 
-        // create Image Acquisition - SwapChain semaphore
-        addSemaphore(pRenderer, &pImageAcquiredSemaphore);
-
         // init resource loader interface (The Forge stuff)
         initResourceLoaderInterface(pRenderer);
-
-        // Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet
-        for (int i = 0; i < 6; ++i)
-        {
-            TextureLoadDesc textureDesc = {};
-            textureDesc.pFileName = pSkyBoxImageFileNames[i];
-            textureDesc.ppTexture = &pSkyBoxTextures[i];
-            // Textures representing color should be stored in SRGB or HDR format
-            textureDesc.mCreationFlag = TEXTURE_CREATION_FLAG_SRGB;
-            addResource(&textureDesc, NULL);
-        }
 
         // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
         uint64_t       skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
@@ -251,20 +237,6 @@ public:
         skyboxVbDesc.pData = gSkyBoxPoints;
         skyboxVbDesc.ppBuffer = &pSkyBoxVertexBuffer;
         addResource(&skyboxVbDesc, NULL);
-
-        // loads skybox uniform buffer
-        BufferLoadDesc ubDesc = {};
-        ubDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        ubDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_CPU_TO_GPU;
-        ubDesc.mDesc.mFlags = BUFFER_CREATION_FLAG_PERSISTENT_MAP_BIT;
-        ubDesc.pData = NULL;
-        for (uint32_t i = 0; i < gDataBufferCount; ++i)
-        {
-            ubDesc.mDesc.pName = "SkyboxUniformBuffer";
-            ubDesc.mDesc.mSize = sizeof(UniformBlockSky);
-            ubDesc.ppBuffer = &pSkyboxUniformBuffer[i];
-            addResource(&ubDesc, NULL);
-        }
 
         // more bread crumbs
         if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
@@ -351,6 +323,33 @@ public:
             /// create RootSignatures
             addRootSignatures();
 
+            // Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet
+            for (int i = 0; i < 6; ++i)
+            {
+                TextureLoadDesc textureDesc = {};
+                textureDesc.pFileName = pSkyBoxImageFileNames[i];
+                textureDesc.ppTexture = &pSkyBoxTextures[i];
+                // Textures representing color should be stored in SRGB or HDR format
+                textureDesc.mCreationFlag = TEXTURE_CREATION_FLAG_SRGB;
+                addResource(&textureDesc, NULL);
+            }
+
+            waitForAllResourceLoads();
+
+            // loads skybox uniform buffer
+            BufferLoadDesc ubDesc = {};
+            ubDesc.mDesc.mDescriptors = DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            ubDesc.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_CPU_TO_GPU;
+            ubDesc.mDesc.mFlags = BUFFER_CREATION_FLAG_PERSISTENT_MAP_BIT;
+            ubDesc.pData = NULL;
+            for (uint32_t i = 0; i < gDataBufferCount; ++i)
+            {
+                ubDesc.mDesc.pName = "SkyboxUniformBuffer";
+                ubDesc.mDesc.mSize = sizeof(UniformBlockSky);
+                ubDesc.ppBuffer = &pSkyboxUniformBuffer[i];
+                addResource(&ubDesc, NULL);
+            }
+
             /// create DescriptorSets
             addDescriptorSets();
 
@@ -360,6 +359,9 @@ public:
 
         if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
         {
+            // create Image Acquisition - SwapChain semaphore
+            addSemaphore(pRenderer, &pImageAcquiredSemaphore);
+
             /// create SwapChain
             if (!addSwapChain())
                 return false;

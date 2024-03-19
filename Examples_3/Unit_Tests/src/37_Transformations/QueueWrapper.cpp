@@ -24,6 +24,8 @@ void QueueWrapper::submit(Command* command, Fence* signalFence, Semaphore** wait
     queueSubmit(queue, &submitDesc);
 }
 
+#ifndef __not_in_the_path_yet__
+
 void QueueWrapper::present(uint32_t swapchainImageIndex, SwapChainWrapper* chain, uint32_t waitSemaphoresCount, Semaphore** waitSemaphores)
 {
     QueuePresentDesc presentDesc = {};
@@ -44,3 +46,5 @@ void QueueWrapper::waitForIdleQueue(SwapChainWrapper* chain, IApp* app)
         ::toggleVSync(RendererWrapper::getRenderer(), &pSwapChain);
     }
 }
+
+#endif

@@ -29,12 +29,12 @@ private:
     CmdRing              CommandRing;
     QueueWrapper*        graphicsQueue = NULL;
     SwapChainWrapper*    chain = NULL;
-    RenderTargetWrapper* depthBuffer;
-    PipelineWrapper*     skyBoxDrawPipeline;
-    TextureSet*          skyBoxTextures;
-    UniformSet*          skyUniforms;
-    BufferResource*      skyBoxVertexBuffer;
-    Signature*           rootSignature;
+    RenderTargetWrapper* depthBuffer = NULL;
+    PipelineWrapper*     skyBoxDrawPipeline = NULL;
+    TextureSet*          skyBoxTextures = NULL;
+    UniformSet*          skyUniforms = NULL;
+    BufferResource*      skyBoxVertexBuffer = NULL;
+    Signature*           rootSignature = NULL;
 
     // Buffers
 

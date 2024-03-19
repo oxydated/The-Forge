@@ -1,5 +1,6 @@
 #include "CastleApp.h"
 #include "RenderTargetWrapper.h"
+#include "RendererWrapper.h"
 
 // We only need Two sets of resources (one in flight and one being used on CPU)
 const uint32_t gDataBufferCount = 2;
@@ -60,6 +61,38 @@ const uint32_t gDataBufferCount = 2;
 
 #ifndef __not_in_the_path_yet__
 
+std::vector<std::string>
+    skyboxTextureFileNames = { "Skybox_right1.tex",  "Skybox_left2.tex",  "Skybox_top3.tex",
+                               "Skybox_bottom4.tex", "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
+
+// Generate sky box vertex buffer
+const float gSkyBoxPoints[] = {
+    10.0f,  -10.0f, -10.0f, 6.0f, // -z
+    -10.0f, -10.0f, -10.0f, 6.0f,   -10.0f, 10.0f,  -10.0f, 6.0f,   -10.0f, 10.0f,
+    -10.0f, 6.0f,   10.0f,  10.0f,  -10.0f, 6.0f,   10.0f,  -10.0f, -10.0f, 6.0f,
+
+    -10.0f, -10.0f, 10.0f,  2.0f, //-x
+    -10.0f, -10.0f, -10.0f, 2.0f,   -10.0f, 10.0f,  -10.0f, 2.0f,   -10.0f, 10.0f,
+    -10.0f, 2.0f,   -10.0f, 10.0f,  10.0f,  2.0f,   -10.0f, -10.0f, 10.0f,  2.0f,
+
+    10.0f,  -10.0f, -10.0f, 1.0f, //+x
+    10.0f,  -10.0f, 10.0f,  1.0f,   10.0f,  10.0f,  10.0f,  1.0f,   10.0f,  10.0f,
+    10.0f,  1.0f,   10.0f,  10.0f,  -10.0f, 1.0f,   10.0f,  -10.0f, -10.0f, 1.0f,
+
+    -10.0f, -10.0f, 10.0f,  5.0f, // +z
+    -10.0f, 10.0f,  10.0f,  5.0f,   10.0f,  10.0f,  10.0f,  5.0f,   10.0f,  10.0f,
+    10.0f,  5.0f,   10.0f,  -10.0f, 10.0f,  5.0f,   -10.0f, -10.0f, 10.0f,  5.0f,
+
+    -10.0f, 10.0f,  -10.0f, 3.0f, //+y
+    10.0f,  10.0f,  -10.0f, 3.0f,   10.0f,  10.0f,  10.0f,  3.0f,   10.0f,  10.0f,
+    10.0f,  3.0f,   -10.0f, 10.0f,  10.0f,  3.0f,   -10.0f, 10.0f,  -10.0f, 3.0f,
+
+    10.0f,  -10.0f, 10.0f,  4.0f, //-y
+    10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
+    -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
+};
+uint64_t skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
+
 struct commandRecordObjects
 {
     Command*             cmd;
@@ -78,30 +111,33 @@ void CastleApp::Exit() {}
 
 bool CastleApp::Init()
 {
+
     // FILE PATHS
 
     // window and renderer setup
-
     // check for init success
-    //if (!pRenderer)
-    //    return false;
+    if (!RendererWrapper::initRenderer(GetName()))
+        return false;
 
     // create Queue
+    graphicsQueue = new QueueWrapper();
 
     // create GPUCmdRing
+    CommandRing = CmdRing(graphicsQueue);
 
-    // create Image Acquisition - SwapChain semaphore
+    // create Image Acquisition - SwapChain semaphore (moved to SwapChain creation)
 
     // init resource loader interface (The Forge stuff)
-    //initResourceLoaderInterface(pRenderer);
+    initResourceLoaderInterface(RendererWrapper::getRenderer());
 
-    // Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet
+    //// Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet (moved to TextureSet)
 
-    // Creates Sampler (moved to Signature)
+    //// Creates Sampler (moved to Signature)
 
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
+    skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize);
 
-    // loads skybox uniform buffer
+    //// loads skybox uniform buffer (moved to UniformSet)
 
     // more bread crumbs
 
@@ -124,7 +160,8 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
 
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
-        skyBoxTextures = new TextureSet(rootSignature);
+        /// 
+        skyBoxTextures = new TextureSet(rootSignature, skyboxTextureFileNames);
         skyUniforms = new UniformSet(rootSignature);
     }
 

@@ -4,10 +4,12 @@
 
 #include "CmdRingElement.h"
 
+class QueueWrapper;
+
 class CmdRing
 {
 public:
-    CmdRing();
+    CmdRing(QueueWrapper*);
 
     void remove();
 

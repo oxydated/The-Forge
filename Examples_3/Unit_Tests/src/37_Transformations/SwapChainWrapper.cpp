@@ -2,6 +2,8 @@
 #include "RendererWrapper.h"
 #include "RenderTargetWrapper.h"
 
+#ifndef __not_in_path_yet__
+
 acquiredRenderTarget SwapChainWrapper::acquireNextImageFromSwapChain()
 {
     acquiredRenderTarget acquiredImageFromSwapChain = {};
@@ -15,3 +17,5 @@ acquiredRenderTarget SwapChainWrapper::acquireNextImageFromSwapChain()
 Semaphore* SwapChainWrapper::getImageAcquiredSemaphore() { return imageAcquiredSemaphore; }
 
 SwapChain* SwapChainWrapper::getSwapChain() { return swapChain; }
+
+#endif
