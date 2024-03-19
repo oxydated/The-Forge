@@ -6,12 +6,12 @@
 class BufferResource
 {
 public:
-    BufferResource(const void* data, uint64_t dataSize);
+    BufferResource(const void* data, uint64_t dataSize, DescriptorType type, ResourceMemoryUsage usage);
 
     Buffer* getBuffer();
     
     static std::vector<Buffer*> makeBuffersArray(std::vector<BufferResource*>);
 
 private:
-    Buffer* buffer;
+    Buffer* buffer = NULL;
 };

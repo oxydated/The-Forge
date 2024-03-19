@@ -12,7 +12,7 @@ class Signature;
 class PipelineWrapper
 {
 public:
-    PipelineWrapper(Signature*, RenderTargetWrapper*, RenderTargetWrapper*);
+    PipelineWrapper(Signature* rootSignature, std::string shaderName, RenderTargetWrapper* swapChainRT, RenderTargetWrapper* depthBufferRT);
 
     void remove();
 
@@ -20,5 +20,4 @@ public:
 
 private:
     Pipeline* pipeline = NULL;
-    Renderer* pRenderer = NULL;
 };

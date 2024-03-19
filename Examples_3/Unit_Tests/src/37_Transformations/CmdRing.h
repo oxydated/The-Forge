@@ -9,7 +9,9 @@ class QueueWrapper;
 class CmdRing
 {
 public:
-    CmdRing(QueueWrapper*);
+    CmdRing();
+
+    CmdRing(QueueWrapper* queue, uint32_t poolCount);
 
     void remove();
 

@@ -4,66 +4,22 @@
 
 // We only need Two sets of resources (one in flight and one being used on CPU)
 const uint32_t gDataBufferCount = 2;
-//
-//bool CastleApp::addSwapChain()
-//{
-//    SwapChainDesc swapChainDesc = {};
-//    swapChainDesc.mWindowHandle = pWindow->handle;
-//    swapChainDesc.mPresentQueueCount = 1;
-//    //swapChainDesc.ppPresentQueues = &pGraphicsQueue;
-//    swapChainDesc.mWidth = mSettings.mWidth;
-//    swapChainDesc.mHeight = mSettings.mHeight;
-//    //swapChainDesc.mImageCount = getRecommendedSwapchainImageCount(pRenderer, &pWindow->handle);
-//    //swapChainDesc.mColorFormat = getSupportedSwapchainFormat(pRenderer, &swapChainDesc, COLOR_SPACE_SDR_SRGB);
-//    swapChainDesc.mColorSpace = COLOR_SPACE_SDR_SRGB;
-//    swapChainDesc.mEnableVsync = mSettings.mVSyncEnabled;
-//    swapChainDesc.mFlags = SWAP_CHAIN_CREATION_FLAG_ENABLE_FOVEATED_RENDERING_VR;
-//    //::addSwapChain(pRenderer, &swapChainDesc, &pSwapChain);
-//
-//    //return pSwapChain != NULL;
-//    return false;
-//}
-//
-//bool CastleApp::addDepthBuffer()
-//{
-//    // Add depth buffer
-//    RenderTargetDesc depthRT = {};
-//    depthRT.mArraySize = 1;
-//    depthRT.mClearValue.depth = 0.0f;
-//    depthRT.mClearValue.stencil = 0;
-//    depthRT.mDepth = 1;
-//    depthRT.mFormat = TinyImageFormat_D32_SFLOAT;
-//    depthRT.mStartState = RESOURCE_STATE_DEPTH_WRITE;
-//    depthRT.mHeight = mSettings.mHeight;
-//    depthRT.mSampleCount = SAMPLE_COUNT_1;
-//    depthRT.mSampleQuality = 0;
-//    depthRT.mWidth = mSettings.mWidth;
-//    depthRT.mFlags = TEXTURE_CREATION_FLAG_ON_TILE | TEXTURE_CREATION_FLAG_VR_MULTIVIEW;
-//    //addRenderTarget(pRenderer, &depthRT, &pDepthBuffer);
-//
-//    //return pDepthBuffer != NULL;
-//    return false;
-//}
-//
-//void CastleApp::addDescriptorSets()
-//{
-//    //DescriptorSetDesc desc = { pRootSignature, DESCRIPTOR_UPDATE_FREQ_NONE, 1 };
-//    //addDescriptorSet(pRenderer, &desc, &pDescriptorSetTexture);
-//    //desc = { pRootSignature, DESCRIPTOR_UPDATE_FREQ_PER_FRAME, gDataBufferCount * 2 };
-//    //addDescriptorSet(pRenderer, &desc, &pDescriptorSetUniforms);
-//}
-//
-//void CastleApp::removeDescriptorSets()
-//{
-//    //removeDescriptorSet(pRenderer, pDescriptorSetTexture);
-//    //removeDescriptorSet(pRenderer, pDescriptorSetUniforms);
-//}
 
 #ifndef __not_in_the_path_yet__
 
-std::vector<std::string>
-    skyboxTextureFileNames = { "Skybox_right1.tex",  "Skybox_left2.tex",  "Skybox_top3.tex",
-                               "Skybox_bottom4.tex", "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
+//DEFINE_APPLICATION_MAIN(CastleApp)
+
+std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
+                                                      "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
+
+std::vector<textureParams> skyboxTextureParameters = { { "Skybox_right1.tex", "RightText" },
+                                                       { "Skybox_left2.tex", "LeftText" },
+                                                       { "Skybox_top3.tex", "TopText" },
+                                                       { "Skybox_bottom4.tex", "BotText" },
+                                                       { "Skybox_front5.tex", "FrontText" },
+                                                       { "Ground_texture.dds", "BackText" } /*, "Skybox_back6.tex"*/ };
+
+
 
 // Generate sky box vertex buffer
 const float gSkyBoxPoints[] = {
@@ -113,6 +69,12 @@ bool CastleApp::Init()
 {
 
     // FILE PATHS
+    fsSetPathForResourceDir(pSystemFileIO, RM_CONTENT, RD_SHADER_BINARIES, "CompiledShaders");
+    fsSetPathForResourceDir(pSystemFileIO, RM_CONTENT, RD_TEXTURES, "Textures");
+    fsSetPathForResourceDir(pSystemFileIO, RM_CONTENT, RD_FONTS, "Fonts");
+    fsSetPathForResourceDir(pSystemFileIO, RM_DEBUG, RD_SCREENSHOTS, "Screenshots");
+    fsSetPathForResourceDir(pSystemFileIO, RM_CONTENT, RD_SCRIPTS, "Scripts");
+    fsSetPathForResourceDir(pSystemFileIO, RM_DEBUG, RD_DEBUG, "Debug");
 
     // window and renderer setup
     // check for init success
@@ -123,7 +85,7 @@ bool CastleApp::Init()
     graphicsQueue = new QueueWrapper();
 
     // create GPUCmdRing
-    CommandRing = CmdRing(graphicsQueue);
+    CommandRing = CmdRing(graphicsQueue, totalFrameBuffers);
 
     // create Image Acquisition - SwapChain semaphore (moved to SwapChain creation)
 
@@ -135,7 +97,7 @@ bool CastleApp::Init()
     //// Creates Sampler (moved to Signature)
 
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
-    skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize);
+    skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize, DESCRIPTOR_TYPE_VERTEX_BUFFER, RESOURCE_MEMORY_USAGE_GPU_ONLY);
 
     //// loads skybox uniform buffer (moved to UniformSet)
 
@@ -156,13 +118,13 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// load shaders
         /// create RootSignatures
 
-        rootSignature = new Signature({ "uSampler0" }, { "skybox.vert", "skybox.frag" });
+        rootSignature = new Signature({ "uSampler0" }, { { "SkyBoxDrawShader", { "skybox.vert", "skybox.frag" } } });
 
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
         /// 
-        skyBoxTextures = new TextureSet(rootSignature, skyboxTextureFileNames);
-        skyUniforms = new UniformSet(rootSignature);
+        skyBoxTextures = new TextureSet(rootSignature, skyboxTextureParameters);
+        skyUniforms = new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(UniformBlockSky) } });
     }
 
     if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -185,7 +147,7 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// create pipeline
 
         //addPipelines();
-        skyBoxDrawPipeline = new PipelineWrapper(rootSignature, chain->getRenderTargetByIndex(0), depthBuffer);
+        skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
     }
 
     // UI stuff
@@ -194,6 +156,12 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
 
     return true;
 }
+
+void CastleApp::Unload(ReloadDesc* pReloadDesc) {}
+
+void CastleApp::Update(float deltaTime) {}
+
+CastleApp::CastleApp():IApp() {}
 
 void CastleApp::Draw()
 {
@@ -334,6 +302,8 @@ void CastleApp::commandsToRecord(void* data)
     barriers[0] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
     pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 }
+
+const char* CastleApp::GetName() { return "CastleApp"; }
 
 #else
 void CastleApp::Draw()

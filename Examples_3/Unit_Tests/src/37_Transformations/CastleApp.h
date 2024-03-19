@@ -2,21 +2,21 @@
 #define __CASTLEAPP__H__
 
 // Renderer
+#include "../../../../Common_3/Application/Interfaces/IApp.h"
 #include "../../../../Common_3/Graphics/Interfaces/IGraphics.h"
 
-#include "Command.h"
 #include "CmdRing.h"
+#include "Command.h"
 #include "QueueWrapper.h"
-#include "SwapChainWrapper.h"
 #include "RenderTargetWrapper.h"
-//#include "IAppCommand.h"
-#include "projections.h"
-#include "UniformSet.h"
+#include "SwapChainWrapper.h"
+// #include "IAppCommand.h"
+#include "BufferResource.h"
 #include "PipelineWrapper.h"
+#include "Signature.h"
 #include "TextureSet.h"
 #include "UniformSet.h"
-#include "BufferResource.h"
-#include "Signature.h"
+#include "projections.h"
 
 class CastleApp: public IApp
 {
@@ -26,7 +26,7 @@ private:
 
     // wrappers
 
-    CmdRing              CommandRing;
+    CmdRing              CommandRing = {};
     QueueWrapper*        graphicsQueue = NULL;
     SwapChainWrapper*    chain = NULL;
     RenderTargetWrapper* depthBuffer = NULL;
@@ -43,11 +43,14 @@ private:
     // frame couting
 
     int frameIndex = 0;
-    int totalFrameBuffers;
+    int totalFrameBuffers = 2;
 
     void incrementFrameIndex();
 
     static void commandsToRecord(void*);
+
+public:
+    CastleApp();
 
     virtual bool Init() override;
     virtual void Exit() override;

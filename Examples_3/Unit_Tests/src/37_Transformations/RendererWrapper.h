@@ -7,7 +7,7 @@ class RendererWrapper
 {
 public:
     static Renderer* getRenderer();
-    static bool      initRenderer(std::string);
+    static bool      initRenderer(const char* appName);
 
 private:
     static Renderer* renderer;

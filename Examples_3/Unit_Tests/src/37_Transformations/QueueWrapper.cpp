@@ -4,6 +4,15 @@
 #include "RendererWrapper.h"
 #include "../../../../Common_3/Resources/ResourceLoader/Interfaces/IResourceLoader.h"
 
+QueueWrapper::QueueWrapper()
+{
+    // create Queue
+    QueueDesc queueDesc = {};
+    queueDesc.mType = QUEUE_TYPE_GRAPHICS;
+    queueDesc.mFlag = QUEUE_FLAG_INIT_MICROPROFILE;
+    addQueue(RendererWrapper::getRenderer(), &queueDesc, &queue);
+}
+
 void QueueWrapper::submit(Command* command, Fence* signalFence, Semaphore** waitSemaphores, Semaphore** signalSemaphores)
 {
     FlushResourceUpdateDesc flushUpdateDesc = {};
@@ -46,5 +55,7 @@ void QueueWrapper::waitForIdleQueue(SwapChainWrapper* chain, IApp* app)
         ::toggleVSync(RendererWrapper::getRenderer(), &pSwapChain);
     }
 }
+
+Queue* QueueWrapper::getQueue() { return queue; }
 
 #endif

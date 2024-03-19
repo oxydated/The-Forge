@@ -111,8 +111,6 @@ uint32_t       gCrashedFrame = 0;
 const uint32_t gMarkerCount = 2;
 const uint32_t gValidMarkerValue = 1U;
 
-Buffer*   pMarkerBuffer[gDataBufferCount] = { NULL };
-
 DECLARE_RENDERER_FUNCTION(void, mapBuffer, Renderer* pRenderer, Buffer* pBuffer, ReadRange* pRange)
 DECLARE_RENDERER_FUNCTION(void, unmapBuffer, Renderer* pRenderer, Buffer* pBuffer)
 
@@ -147,9 +145,6 @@ const float gSkyBoxPoints[] = {
     10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
     -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
 };
-
-//static unsigned char gPipelineStatsCharArray[2048] = {};
-//static bstring       gPipelineStats = bfromarr(gPipelineStatsCharArray);
 
 void reloadRequest(void*)
 {
@@ -238,13 +233,6 @@ public:
         skyboxVbDesc.ppBuffer = &pSkyBoxVertexBuffer;
         addResource(&skyboxVbDesc, NULL);
 
-        // more bread crumbs
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            // Initialize breadcrumb buffer to write markers in it.
-            initMarkers();
-        }
-
 #ifdef __no_UI__
 
         if (!initUI())
@@ -272,14 +260,6 @@ public:
 #else
         ExitUIAlternative();
 #endif
-
-        // Exit profile
-        //exitProfiler();
-
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            exitMarkers();
-        }
 
         for (uint32_t i = 0; i < gDataBufferCount; ++i)
         {
@@ -461,13 +441,6 @@ public:
         if (fenceStatus == FENCE_STATUS_INCOMPLETE)
             waitForFences(pRenderer, 1, &elem.pFence);
 
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            // Check breadcrumb markers
-            checkMarkers();
-        }
-
-
         // update uniform
 
         BufferUpdateDesc skyboxViewProjCbv = { pSkyboxUniformBuffer[gFrameIndex] };
@@ -483,12 +456,6 @@ public:
 
         Cmd* cmd = elem.pCmds[0];
         beginCmd(cmd);
-
-        if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-        {
-            // Reset markers values
-            resetMarkers(cmd);
-        }
 
         RenderTargetBarrier barriers[] = {
             { pRenderTarget, RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET },
@@ -568,8 +535,6 @@ public:
         queuePresent(pGraphicsQueue, &presentDesc);
 
         // Closing draw, preparing for next image in Swapchain
-
-        //flipProfiler();
 
         gFrameIndex = (gFrameIndex + 1) % gDataBufferCount;
     }
@@ -736,62 +701,6 @@ public:
             params[0].pName = "uniformBlock";
             params[0].ppBuffers = &pSkyboxUniformBuffer[i];
             updateDescriptorSet(pRenderer, i * 2 + 0, pDescriptorSetUniforms, 1, params);
-        }
-    }
-
-    void initMarkers()
-    {
-        BufferLoadDesc breadcrumbBuffer = {};
-        breadcrumbBuffer.mDesc.mDescriptors = DESCRIPTOR_TYPE_UNDEFINED;
-        breadcrumbBuffer.mDesc.mMemoryUsage = RESOURCE_MEMORY_USAGE_GPU_TO_CPU;
-        breadcrumbBuffer.mDesc.mSize = (gMarkerCount + 3) / 4 * 4 * sizeof(uint32_t);
-        breadcrumbBuffer.mDesc.mFlags = BUFFER_CREATION_FLAG_NONE;
-        breadcrumbBuffer.mDesc.mStartState = RESOURCE_STATE_COPY_DEST;
-        breadcrumbBuffer.pData = NULL;
-
-        for (uint32_t i = 0; i < gDataBufferCount; ++i)
-        {
-            breadcrumbBuffer.ppBuffer = &pMarkerBuffer[i];
-            addResource(&breadcrumbBuffer, NULL);
-        }
-    }
-
-    void checkMarkers()
-    {
-        if (bHasCrashed)
-        {
-            ReadRange readRange = { 0, gMarkerCount * sizeof(uint32_t) };
-            mapBuffer(pRenderer, pMarkerBuffer[gCrashedFrame], &readRange);
-
-            uint32_t* markersValue = (uint32_t*)pMarkerBuffer[gCrashedFrame]->pCpuMappedAddress;
-
-            for (uint32_t m = 0; m < gMarkerCount; ++m)
-            {
-                if (gValidMarkerValue != markersValue[m])
-                {
-                    LOGF(LogLevel::eERROR, "[Breadcrumb] crashed frame: %u, marker: %u, value:%u", gCrashedFrame, m, markersValue[m]);
-                }
-            }
-
-            unmapBuffer(pRenderer, pMarkerBuffer[gCrashedFrame]);
-
-            bHasCrashed = false;
-        }
-    }
-
-    void resetMarkers(Cmd* pCmd)
-    {
-        for (uint32_t i = 0; i < gMarkerCount; ++i)
-        {
-            cmdWriteMarker(pCmd, MARKER_TYPE_DEFAULT, 0, pMarkerBuffer[gFrameIndex], i, false);
-        }
-    }
-
-    void exitMarkers()
-    {
-        for (uint32_t i = 0; i < gDataBufferCount; ++i)
-        {
-            removeResource(pMarkerBuffer[i]);
         }
     }
 

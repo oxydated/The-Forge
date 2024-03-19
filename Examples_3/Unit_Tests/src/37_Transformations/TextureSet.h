@@ -8,13 +8,20 @@
 
 class Signature;
 
+struct textureParams
+{
+    std::string fileName;
+    std::string textureName;
+};
+
 class TextureSet
 {
 public:
-    TextureSet(Signature*, std::vector<std::string>);
+    TextureSet(Signature* rootSignature, std::vector<textureParams> params);
 
     DescriptorSet* getDescriptorSet();
 
 private:
     DescriptorSet* pDescriptorSetTexture;
+    std::vector<Texture*> textures;
 };

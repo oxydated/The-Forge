@@ -17,6 +17,8 @@ public:
 
     void waitForIdleQueue(SwapChainWrapper* chain, IApp* app);
 
+    Queue* getQueue();
+
 private:
     Queue* queue;
 };
