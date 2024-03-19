@@ -25,7 +25,7 @@ public:
     static SwapChainWrapper* createSwapChainWrapper(QueueWrapper*, IApp*);
 
 private:
-    SwapChainWrapper(SwapChain*);
+    SwapChainWrapper(SwapChain* pSwapChain, Semaphore* pSemaphore);
     SwapChain* swapChain = NULL;
     Semaphore* imageAcquiredSemaphore = NULL;
 };

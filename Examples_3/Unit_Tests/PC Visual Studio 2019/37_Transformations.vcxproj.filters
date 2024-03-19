@@ -43,6 +43,9 @@
     <ClCompile Include="..\src\37_Transformations\Signature.cpp">
       <Filter>src\37_Transformations</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\37_Transformations\UserInterfaceWrapper.cpp">
+      <Filter>src\37_Transformations</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.frag.fsl">
@@ -157,6 +160,9 @@
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\37_Transformations\projections.h">
+      <Filter>src\37_Transformations\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\37_Transformations\UserInterfaceWrapper.h">
       <Filter>src\37_Transformations\headers</Filter>
     </ClInclude>
   </ItemGroup>

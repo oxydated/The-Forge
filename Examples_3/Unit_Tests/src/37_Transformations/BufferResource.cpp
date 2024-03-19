@@ -12,3 +12,5 @@ BufferResource::BufferResource(const void* data, uint64_t dataSize, DescriptorTy
     bufferDesc.ppBuffer = &buffer;
     addResource(&bufferDesc, NULL);
 }
+
+Buffer* BufferResource::getBuffer() { return buffer; }

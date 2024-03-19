@@ -27,6 +27,9 @@ RenderTargetWrapper* SwapChainWrapper::getRenderTargetByIndex(uint32_t index)
 
 SwapChainWrapper* SwapChainWrapper::createSwapChainWrapper(QueueWrapper* queueWrapper, IApp* app)
 {
+    Semaphore* pImageAcquiredSemaphore = NULL;
+    addSemaphore(RendererWrapper::getRenderer(), &pImageAcquiredSemaphore);
+
     SwapChain*    newSwapChain = NULL;
     Queue*        queue = queueWrapper->getQueue();
     SwapChainDesc swapChainDesc = {};
@@ -45,9 +48,11 @@ SwapChainWrapper* SwapChainWrapper::createSwapChainWrapper(QueueWrapper* queueWr
     {
         return nullptr;
     }
-    return new SwapChainWrapper(newSwapChain);
+    return new SwapChainWrapper(newSwapChain, pImageAcquiredSemaphore);
 }
 
-SwapChainWrapper::SwapChainWrapper(SwapChain* pSwapChain): swapChain(pSwapChain) {}
+SwapChainWrapper::SwapChainWrapper(SwapChain* pSwapChain, Semaphore* pSemaphore): swapChain(pSwapChain), imageAcquiredSemaphore(pSemaphore)
+{
+}
 
 #endif

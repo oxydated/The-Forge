@@ -16,13 +16,15 @@
 #include "Signature.h"
 #include "TextureSet.h"
 #include "UniformSet.h"
+#include "UserInterfaceWrapper.h"
+
 #include "projections.h"
 
 class CastleApp: public IApp
 {
 private:
 
-    UniformBlockSky skyUniformHostBlock;
+    UniformBlockSky skyUniformHostBlock = {};
 
     // wrappers
 
@@ -36,14 +38,17 @@ private:
     BufferResource*      skyBoxVertexBuffer = NULL;
     Signature*           rootSignature = NULL;
 
+    // User Interface
+    UserInterfaceWrapper UI;
+
     // Buffers
 
     std::vector<Buffer*> vertexBuffers;
 
     // frame couting
 
-    int frameIndex = 0;
-    int totalFrameBuffers = 2;
+    uint32_t frameIndex = 0;
+    uint32_t totalFrameBuffers = 2;
 
     void incrementFrameIndex();
 

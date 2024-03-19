@@ -2,7 +2,7 @@
 #include "RendererWrapper.h"
 #include "Command.h"
 
-CmdRingElement::CmdRingElement(GpuCmdRingElement gpuElem): elem(elem) {}
+CmdRingElement::CmdRingElement(GpuCmdRingElement gpuElem): elem(gpuElem) {}
 
 void CmdRingElement::waitForFence()
 { 

@@ -7,7 +7,7 @@ const uint32_t gDataBufferCount = 2;
 
 #ifndef __not_in_the_path_yet__
 
-//DEFINE_APPLICATION_MAIN(CastleApp)
+DEFINE_APPLICATION_MAIN(CastleApp)
 
 std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
                                                       "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
@@ -63,7 +63,7 @@ struct commandRecordObjects
 
 void CastleApp::incrementFrameIndex() { frameIndex = (frameIndex + 1) % totalFrameBuffers; }
 
-void CastleApp::Exit() {}
+void CastleApp::Exit() { UI.ExitUIAlternative(); }
 
 bool CastleApp::Init()
 {
@@ -98,12 +98,18 @@ bool CastleApp::Init()
 
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
     skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize, DESCRIPTOR_TYPE_VERTEX_BUFFER, RESOURCE_MEMORY_USAGE_GPU_ONLY);
+    vertexBuffers = { skyBoxVertexBuffer->getBuffer() };
 
     //// loads skybox uniform buffer (moved to UniformSet)
 
     // more bread crumbs
 
     // initialize UI and input
+
+    if (!UI.initUIAlternative(this))
+    {
+        return false;
+    }
 
     // start frameIndex
 
@@ -124,7 +130,8 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// prepare DescriptorSets (that could be a single step)
         /// 
         skyBoxTextures = new TextureSet(rootSignature, skyboxTextureParameters);
-        skyUniforms = new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(UniformBlockSky) } });
+        skyUniforms =
+            new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(UniformBlockSky) } }, totalFrameBuffers);
     }
 
     if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -152,14 +159,34 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
 
     // UI stuff
 
-    //loadUI(pReloadDesc);
+    UI.loadUI(pReloadDesc, this, chain->getRenderTargetByIndex(0), graphicsQueue);
 
     return true;
 }
 
 void CastleApp::Unload(ReloadDesc* pReloadDesc) {}
 
-void CastleApp::Update(float deltaTime) {}
+void CastleApp::Update(float deltaTime)
+{
+    UI.UpdateUI(deltaTime, this);
+
+    /************************************************************************/
+    // Scene Update
+    /************************************************************************/
+    static float currentTime = 0.0f;
+    currentTime += deltaTime * 1000.0f;
+
+    // update camera with time
+    mat4 viewMat = UI.getCameraController()->getViewMatrix();
+
+    const float  aspectInverse = (float)mSettings.mHeight / (float)mSettings.mWidth;
+    const float  horizontal_fov = PI / 2.0f;
+    CameraMatrix projMat = CameraMatrix::perspectiveReverseZ(horizontal_fov, aspectInverse, 0.1f, 1000.0f);
+
+    viewMat.setTranslation(vec3(0));
+    skyUniformHostBlock = {};
+    skyUniformHostBlock.mProjectView = projMat * viewMat;
+}
 
 CastleApp::CastleApp():IApp() {}
 
@@ -202,7 +229,7 @@ void CastleApp::Draw()
 
     recObjs.cmd = cmd;
     recObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
-    recObjs.depthBuffer;
+    recObjs.depthBuffer = depthBuffer;
     recObjs.pipeline = skyBoxDrawPipeline;
     recObjs.textures = skyBoxTextures;
     recObjs.uniforms = skyUniforms;

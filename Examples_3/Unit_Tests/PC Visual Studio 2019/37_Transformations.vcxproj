@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\37_Transformations\SwapChainWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\TextureSet.cpp" />
     <ClCompile Include="..\src\37_Transformations\UniformSet.cpp" />
+    <ClCompile Include="..\src\37_Transformations\UserInterfaceWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.frag.fsl" />
@@ -59,6 +60,7 @@
     <ClInclude Include="..\src\37_Transformations\SwapChainWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\TextureSet.h" />
     <ClInclude Include="..\src\37_Transformations\UniformSet.h" />
+    <ClInclude Include="..\src\37_Transformations\UserInterfaceWrapper.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{92429F3A-3940-490E-8DF6-0A51496819EA}</ProjectGuid>

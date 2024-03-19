@@ -18,7 +18,7 @@ struct uniformParams
 class UniformSet
 {
 public:
-    UniformSet(Signature* rootSignature, std::vector<uniformParams> params);
+    UniformSet(Signature* rootSignature, std::vector<uniformParams> params, uint32_t numBuffers);
 
     void update(uint32_t index, const void* source, size_t size);
 
