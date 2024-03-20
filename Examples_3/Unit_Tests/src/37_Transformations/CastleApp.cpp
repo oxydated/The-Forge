@@ -374,5 +374,5 @@ void CastleApp::commandsToRecord(void* data)
     pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 }
 
-const char* CastleApp::GetName() { return "CastleApp"; }
+const char* CastleApp::GetName() { return "Castle"; }
 
