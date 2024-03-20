@@ -11,7 +11,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\37_Transformations\37_Transformations.cpp" />
     <ClCompile Include="..\src\37_Transformations\BufferResource.cpp" />
     <ClCompile Include="..\src\37_Transformations\CastleApp.cpp" />
     <ClCompile Include="..\src\37_Transformations\CmdRing.cpp" />
