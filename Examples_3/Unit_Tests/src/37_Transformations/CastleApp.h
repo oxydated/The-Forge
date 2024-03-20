@@ -17,13 +17,11 @@
 #include "UniformSet.h"
 #include "UserInterfaceWrapper.h"
 
-#include "projections.h"
+#include "SkyBoxObj.h"
 
 class CastleApp: public IApp
 {
 private:
-
-    UniformBlockSky skyUniformHostBlock = {};
 
     // wrappers
 
@@ -48,6 +46,10 @@ private:
 
     uint32_t frameIndex = 0;
     uint32_t totalFrameBuffers = 2;
+
+    // Scene objects
+
+    SkyBoxObj* skyBox = NULL;
 
     void incrementFrameIndex();
 

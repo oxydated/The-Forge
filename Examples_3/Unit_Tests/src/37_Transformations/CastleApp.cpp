@@ -7,45 +7,42 @@ const uint32_t gDataBufferCount = 2;
 
 DEFINE_APPLICATION_MAIN(CastleApp)
 
-//std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
-//                                                      "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
-
-std::vector<textureParams> skyboxTextureParameters = { { "Skybox_right1.tex", "RightText" },
-                                                       { "Skybox_left2.tex", "LeftText" },
-                                                       { "Skybox_top3.tex", "TopText" },
-                                                       { "Skybox_bottom4.tex", "BotText" },
-                                                       { "Skybox_front5.tex", "FrontText" },
-                                                       { "Ground_texture.dds", "BackText" } /*, "Skybox_back6.tex"*/ };
+//std::vector<textureParams> skyboxTextureParameters = { { "Skybox_right1.tex", "RightText" },
+//                                                       { "Skybox_left2.tex", "LeftText" },
+//                                                       { "Skybox_top3.tex", "TopText" },
+//                                                       { "Skybox_bottom4.tex", "BotText" },
+//                                                       { "Skybox_front5.tex", "FrontText" },
+//                                                       { "Ground_texture.dds", "BackText" } /*, "Skybox_back6.tex"*/ };
 
 
 
 // Generate sky box vertex buffer
-const float gSkyBoxPoints[] = {
-    10.0f,  -10.0f, -10.0f, 6.0f, // -z
-    -10.0f, -10.0f, -10.0f, 6.0f,   -10.0f, 10.0f,  -10.0f, 6.0f,   -10.0f, 10.0f,
-    -10.0f, 6.0f,   10.0f,  10.0f,  -10.0f, 6.0f,   10.0f,  -10.0f, -10.0f, 6.0f,
-
-    -10.0f, -10.0f, 10.0f,  2.0f, //-x
-    -10.0f, -10.0f, -10.0f, 2.0f,   -10.0f, 10.0f,  -10.0f, 2.0f,   -10.0f, 10.0f,
-    -10.0f, 2.0f,   -10.0f, 10.0f,  10.0f,  2.0f,   -10.0f, -10.0f, 10.0f,  2.0f,
-
-    10.0f,  -10.0f, -10.0f, 1.0f, //+x
-    10.0f,  -10.0f, 10.0f,  1.0f,   10.0f,  10.0f,  10.0f,  1.0f,   10.0f,  10.0f,
-    10.0f,  1.0f,   10.0f,  10.0f,  -10.0f, 1.0f,   10.0f,  -10.0f, -10.0f, 1.0f,
-
-    -10.0f, -10.0f, 10.0f,  5.0f, // +z
-    -10.0f, 10.0f,  10.0f,  5.0f,   10.0f,  10.0f,  10.0f,  5.0f,   10.0f,  10.0f,
-    10.0f,  5.0f,   10.0f,  -10.0f, 10.0f,  5.0f,   -10.0f, -10.0f, 10.0f,  5.0f,
-
-    -10.0f, 10.0f,  -10.0f, 3.0f, //+y
-    10.0f,  10.0f,  -10.0f, 3.0f,   10.0f,  10.0f,  10.0f,  3.0f,   10.0f,  10.0f,
-    10.0f,  3.0f,   -10.0f, 10.0f,  10.0f,  3.0f,   -10.0f, 10.0f,  -10.0f, 3.0f,
-
-    10.0f,  -10.0f, 10.0f,  4.0f, //-y
-    10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
-    -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
-};
-uint64_t skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
+//const float gSkyBoxPoints[] = {
+//    10.0f,  -10.0f, -10.0f, 6.0f, // -z
+//    -10.0f, -10.0f, -10.0f, 6.0f,   -10.0f, 10.0f,  -10.0f, 6.0f,   -10.0f, 10.0f,
+//    -10.0f, 6.0f,   10.0f,  10.0f,  -10.0f, 6.0f,   10.0f,  -10.0f, -10.0f, 6.0f,
+//
+//    -10.0f, -10.0f, 10.0f,  2.0f, //-x
+//    -10.0f, -10.0f, -10.0f, 2.0f,   -10.0f, 10.0f,  -10.0f, 2.0f,   -10.0f, 10.0f,
+//    -10.0f, 2.0f,   -10.0f, 10.0f,  10.0f,  2.0f,   -10.0f, -10.0f, 10.0f,  2.0f,
+//
+//    10.0f,  -10.0f, -10.0f, 1.0f, //+x
+//    10.0f,  -10.0f, 10.0f,  1.0f,   10.0f,  10.0f,  10.0f,  1.0f,   10.0f,  10.0f,
+//    10.0f,  1.0f,   10.0f,  10.0f,  -10.0f, 1.0f,   10.0f,  -10.0f, -10.0f, 1.0f,
+//
+//    -10.0f, -10.0f, 10.0f,  5.0f, // +z
+//    -10.0f, 10.0f,  10.0f,  5.0f,   10.0f,  10.0f,  10.0f,  5.0f,   10.0f,  10.0f,
+//    10.0f,  5.0f,   10.0f,  -10.0f, 10.0f,  5.0f,   -10.0f, -10.0f, 10.0f,  5.0f,
+//
+//    -10.0f, 10.0f,  -10.0f, 3.0f, //+y
+//    10.0f,  10.0f,  -10.0f, 3.0f,   10.0f,  10.0f,  10.0f,  3.0f,   10.0f,  10.0f,
+//    10.0f,  3.0f,   -10.0f, 10.0f,  10.0f,  3.0f,   -10.0f, 10.0f,  -10.0f, 3.0f,
+//
+//    10.0f,  -10.0f, 10.0f,  4.0f, //-y
+//    10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
+//    -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
+//};
+//uint64_t skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
 
 struct commandRecordObjects
 {
@@ -95,6 +92,14 @@ void CastleApp::Exit()
     // exit Renderer
 
     RendererWrapper::remove();
+
+    // delete scene objects
+
+    if (skyBox)
+    {
+        delete skyBox;
+        skyBox = nullptr;
+    }
 }
 
 bool CastleApp::Init()
@@ -107,6 +112,10 @@ bool CastleApp::Init()
     fsSetPathForResourceDir(pSystemFileIO, RM_DEBUG, RD_SCREENSHOTS, "Screenshots");
     fsSetPathForResourceDir(pSystemFileIO, RM_CONTENT, RD_SCRIPTS, "Scripts");
     fsSetPathForResourceDir(pSystemFileIO, RM_DEBUG, RD_DEBUG, "Debug");
+
+    // Initialize scene Objects
+
+    skyBox = new SkyBoxObj(this);
 
     // window and renderer setup
     // check for init success
@@ -125,7 +134,8 @@ bool CastleApp::Init()
     initResourceLoaderInterface(RendererWrapper::getRenderer());
 
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
-    skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize, DESCRIPTOR_TYPE_VERTEX_BUFFER, RESOURCE_MEMORY_USAGE_GPU_ONLY);
+    skyBoxVertexBuffer = new BufferResource(skyBox->getVertexData(), skyBox->getVertexDataSize(), DESCRIPTOR_TYPE_VERTEX_BUFFER,
+                                            RESOURCE_MEMORY_USAGE_GPU_ONLY);
     vertexBuffers = { skyBoxVertexBuffer->getBuffer() };
 
     // initialize UI and input
@@ -151,9 +161,9 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
         
-        skyBoxTextures = new TextureSet(rootSignature, skyboxTextureParameters);
+        skyBoxTextures = new TextureSet(rootSignature, skyBox->getTexturesToLoad());
         skyUniforms =
-            new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(UniformBlockSky) } }, totalFrameBuffers);
+            new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(skyBox->getUniformDataSize()) } }, totalFrameBuffers);
     }
 
     if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -263,16 +273,9 @@ void CastleApp::Update(float deltaTime)
     static float currentTime = 0.0f;
     currentTime += deltaTime * 1000.0f;
 
-    // update camera with time
-    mat4 viewMat = UI.getCameraController()->getViewMatrix();
-
-    const float  aspectInverse = (float)mSettings.mHeight / (float)mSettings.mWidth;
-    const float  horizontal_fov = PI / 2.0f;
-    CameraMatrix projMat = CameraMatrix::perspectiveReverseZ(horizontal_fov, aspectInverse, 0.1f, 1000.0f);
-
-    viewMat.setTranslation(vec3(0));
-    skyUniformHostBlock = {};
-    skyUniformHostBlock.mProjectView = projMat * viewMat;
+    // update objects in scene
+    
+    skyBox->update(deltaTime, UI.getCameraController());
 }
 
 CastleApp::CastleApp():IApp() {}
@@ -296,7 +299,7 @@ void CastleApp::Draw()
 
     // update uniform
 
-    skyUniforms->update(frameIndex, &skyUniformHostBlock, sizeof(UniformBlockSky));
+    skyUniforms->update(frameIndex, skyBox->getUniformData(), skyBox->getUniformDataSize());
 
     // Reset cmd pool for this frame
 

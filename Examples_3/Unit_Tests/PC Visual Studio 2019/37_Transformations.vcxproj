@@ -21,6 +21,7 @@
     <ClCompile Include="..\src\37_Transformations\RendererWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\RenderTargetWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\Signature.cpp" />
+    <ClCompile Include="..\src\37_Transformations\SkyBoxObj.cpp" />
     <ClCompile Include="..\src\37_Transformations\SwapChainWrapper.cpp" />
     <ClCompile Include="..\src\37_Transformations\TextureSet.cpp" />
     <ClCompile Include="..\src\37_Transformations\UniformSet.cpp" />
@@ -56,6 +57,8 @@
     <ClInclude Include="..\src\37_Transformations\RenderTargetWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\SemaphoreWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\Signature.h" />
+    <ClInclude Include="..\src\37_Transformations\ISceneObject.h" />
+    <ClInclude Include="..\src\37_Transformations\SkyBoxObj.h" />
     <ClInclude Include="..\src\37_Transformations\SwapChainWrapper.h" />
     <ClInclude Include="..\src\37_Transformations\TextureSet.h" />
     <ClInclude Include="..\src\37_Transformations\UniformSet.h" />
