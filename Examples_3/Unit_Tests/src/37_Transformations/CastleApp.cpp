@@ -7,8 +7,8 @@ const uint32_t gDataBufferCount = 2;
 
 DEFINE_APPLICATION_MAIN(CastleApp)
 
-std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
-                                                      "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
+//std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
+//                                                      "Skybox_front5.tex", "Ground_texture.dds" /*, "Skybox_back6.tex"*/ };
 
 std::vector<textureParams> skyboxTextureParameters = { { "Skybox_right1.tex", "RightText" },
                                                        { "Skybox_left2.tex", "LeftText" },
