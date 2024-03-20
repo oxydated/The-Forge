@@ -7,43 +7,6 @@ const uint32_t gDataBufferCount = 2;
 
 DEFINE_APPLICATION_MAIN(CastleApp)
 
-//std::vector<textureParams> skyboxTextureParameters = { { "Skybox_right1.tex", "RightText" },
-//                                                       { "Skybox_left2.tex", "LeftText" },
-//                                                       { "Skybox_top3.tex", "TopText" },
-//                                                       { "Skybox_bottom4.tex", "BotText" },
-//                                                       { "Skybox_front5.tex", "FrontText" },
-//                                                       { "Ground_texture.dds", "BackText" } /*, "Skybox_back6.tex"*/ };
-
-
-
-// Generate sky box vertex buffer
-//const float gSkyBoxPoints[] = {
-//    10.0f,  -10.0f, -10.0f, 6.0f, // -z
-//    -10.0f, -10.0f, -10.0f, 6.0f,   -10.0f, 10.0f,  -10.0f, 6.0f,   -10.0f, 10.0f,
-//    -10.0f, 6.0f,   10.0f,  10.0f,  -10.0f, 6.0f,   10.0f,  -10.0f, -10.0f, 6.0f,
-//
-//    -10.0f, -10.0f, 10.0f,  2.0f, //-x
-//    -10.0f, -10.0f, -10.0f, 2.0f,   -10.0f, 10.0f,  -10.0f, 2.0f,   -10.0f, 10.0f,
-//    -10.0f, 2.0f,   -10.0f, 10.0f,  10.0f,  2.0f,   -10.0f, -10.0f, 10.0f,  2.0f,
-//
-//    10.0f,  -10.0f, -10.0f, 1.0f, //+x
-//    10.0f,  -10.0f, 10.0f,  1.0f,   10.0f,  10.0f,  10.0f,  1.0f,   10.0f,  10.0f,
-//    10.0f,  1.0f,   10.0f,  10.0f,  -10.0f, 1.0f,   10.0f,  -10.0f, -10.0f, 1.0f,
-//
-//    -10.0f, -10.0f, 10.0f,  5.0f, // +z
-//    -10.0f, 10.0f,  10.0f,  5.0f,   10.0f,  10.0f,  10.0f,  5.0f,   10.0f,  10.0f,
-//    10.0f,  5.0f,   10.0f,  -10.0f, 10.0f,  5.0f,   -10.0f, -10.0f, 10.0f,  5.0f,
-//
-//    -10.0f, 10.0f,  -10.0f, 3.0f, //+y
-//    10.0f,  10.0f,  -10.0f, 3.0f,   10.0f,  10.0f,  10.0f,  3.0f,   10.0f,  10.0f,
-//    10.0f,  3.0f,   -10.0f, 10.0f,  10.0f,  3.0f,   -10.0f, 10.0f,  -10.0f, 3.0f,
-//
-//    10.0f,  -10.0f, 10.0f,  4.0f, //-y
-//    10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
-//    -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
-//};
-//uint64_t skyBoxDataSize = 4 * 6 * 6 * sizeof(float);
-
 struct commandRecordObjects
 {
     Command*             cmd;
@@ -185,7 +148,10 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
     {
         /// create pipeline
 
-        skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
+        //skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
+
+        skyBoxDrawPipeline =
+            new PipelineWrapper(rootSignature, "SkyBoxDrawShader", skyBox->getVertexLayout(), chain->getRenderTargetByIndex(0), nullptr, CULL_MODE_NONE);
     }
 
     // UI stuff
