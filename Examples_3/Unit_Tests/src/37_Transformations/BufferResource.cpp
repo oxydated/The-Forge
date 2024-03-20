@@ -13,4 +13,6 @@ BufferResource::BufferResource(const void* data, uint64_t dataSize, DescriptorTy
     addResource(&bufferDesc, NULL);
 }
 
+BufferResource::~BufferResource() { removeResource(buffer); }
+
 Buffer* BufferResource::getBuffer() { return buffer; }

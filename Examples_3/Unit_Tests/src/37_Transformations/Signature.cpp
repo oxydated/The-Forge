@@ -60,6 +60,20 @@ Signature::Signature(std::vector<std::string> samplerNames, std::vector<shaderCr
     addRootSignature(RendererWrapper::getRenderer(), &rootDesc, &rootSignature);
 }
 
+Signature::~Signature()
+{
+    removeRootSignature(RendererWrapper::getRenderer(), rootSignature);
+
+    for (auto& pair : shaders)
+    {
+        removeShader(RendererWrapper::getRenderer(), pair.second);
+    }
+    for (auto& pair : samplers)
+    {
+        removeSampler(RendererWrapper::getRenderer(), pair.second);
+    }
+}
+
 RootSignature* Signature::getRootSignature() { return rootSignature; }
 
 Shader* Signature::getShaderByName(std::string shaderName) { 

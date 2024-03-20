@@ -56,6 +56,7 @@ void UserInterfaceWrapper::loadUI(ReloadDesc* pReloadDesc, IApp* app, RenderTarg
 
 void UserInterfaceWrapper::ExitUIAlternative()
 {
+    exitScreenshotInterface();
     removeCamera();
     exitUserInterface();
     exitFontSystem();
@@ -177,6 +178,12 @@ bool UserInterfaceWrapper::CameraSetup(IApp* app)
     setGlobalInputAction(&globalInputActionDesc);
 
     return true;
+}
+
+void UserInterfaceWrapper::unloadUI(ReloadDesc* pReloadDesc)
+{
+    unloadFontSystem(pReloadDesc->mType);
+    unloadUserInterface(pReloadDesc->mType);
 }
 
 void UserInterfaceWrapper::removeCamera()

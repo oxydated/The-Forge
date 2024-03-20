@@ -17,6 +17,8 @@ class Signature
 public:
     Signature(std::vector<std::string> samplerNames, std::vector<shaderCreationParameters> shaderParams);
 
+    ~Signature();
+
     RootSignature* getRootSignature();
 
     Shader* getShaderByName(std::string shaderName);

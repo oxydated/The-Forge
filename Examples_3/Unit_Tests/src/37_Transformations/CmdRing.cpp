@@ -16,6 +16,8 @@ CmdRing::CmdRing(QueueWrapper* queue, uint32_t poolCount)
     addGpuCmdRing(RendererWrapper::getRenderer(), &cmdRingDesc, &cmdRing);
 }
 
+void CmdRing::remove() { removeGpuCmdRing(RendererWrapper::getRenderer(), &cmdRing); }
+
 CmdRingElement CmdRing::getNextElement(bool cyclePool, uint32_t cmdCount)
 {
     return getNextGpuCmdRingElement(&cmdRing, cyclePool, cmdCount);

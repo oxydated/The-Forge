@@ -10,7 +10,6 @@
 #include "QueueWrapper.h"
 #include "RenderTargetWrapper.h"
 #include "SwapChainWrapper.h"
-// #include "IAppCommand.h"
 #include "BufferResource.h"
 #include "PipelineWrapper.h"
 #include "Signature.h"

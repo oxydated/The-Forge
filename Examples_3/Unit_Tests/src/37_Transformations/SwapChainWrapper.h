@@ -24,6 +24,8 @@ public:
 
     static SwapChainWrapper* createSwapChainWrapper(QueueWrapper*, IApp*);
 
+    ~SwapChainWrapper();
+
 private:
     SwapChainWrapper(SwapChain* pSwapChain, Semaphore* pSemaphore);
     SwapChain* swapChain = NULL;

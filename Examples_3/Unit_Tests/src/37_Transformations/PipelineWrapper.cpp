@@ -59,3 +59,5 @@ PipelineWrapper::PipelineWrapper(Signature* rootSignature, std::string shaderNam
 }
 
 Pipeline* PipelineWrapper::getPipeline() { return pipeline; }
+
+PipelineWrapper::~PipelineWrapper() { removePipeline(RendererWrapper::getRenderer(), pipeline); }

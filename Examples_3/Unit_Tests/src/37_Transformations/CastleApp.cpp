@@ -5,8 +5,6 @@
 // We only need Two sets of resources (one in flight and one being used on CPU)
 const uint32_t gDataBufferCount = 2;
 
-#ifndef __not_in_the_path_yet__
-
 DEFINE_APPLICATION_MAIN(CastleApp)
 
 std::vector<std::string> skyboxTextureFileNames = { "Skybox_right1.tex", "Skybox_left2.tex",  "Skybox_top3.tex", "Skybox_bottom4.tex",
@@ -63,7 +61,41 @@ struct commandRecordObjects
 
 void CastleApp::incrementFrameIndex() { frameIndex = (frameIndex + 1) % totalFrameBuffers; }
 
-void CastleApp::Exit() { UI.ExitUIAlternative(); }
+void CastleApp::Exit()
+{
+    // exit UI
+
+    UI.ExitUIAlternative();
+
+    // remove vertexBuffer
+
+    if (skyBoxVertexBuffer)
+    {
+        delete skyBoxVertexBuffer;
+        skyBoxVertexBuffer = nullptr;
+    }
+    vertexBuffers.clear();
+
+    // remove GpuCmdRing
+
+    CommandRing.remove();
+
+    // exit resouce loader
+
+    exitResourceLoaderInterface(RendererWrapper::getRenderer());
+
+    // remove Queue
+
+    if (graphicsQueue)
+    {
+        delete graphicsQueue;
+        graphicsQueue = nullptr;    
+    }
+
+    // exit Renderer
+
+    RendererWrapper::remove();
+}
 
 bool CastleApp::Init()
 {
@@ -92,17 +124,9 @@ bool CastleApp::Init()
     // init resource loader interface (The Forge stuff)
     initResourceLoaderInterface(RendererWrapper::getRenderer());
 
-    //// Loads Skybox Textures -> also creates the texture resources represented by the DescriptorSet (moved to TextureSet)
-
-    //// Creates Sampler (moved to Signature)
-
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
     skyBoxVertexBuffer = new BufferResource(gSkyBoxPoints, skyBoxDataSize, DESCRIPTOR_TYPE_VERTEX_BUFFER, RESOURCE_MEMORY_USAGE_GPU_ONLY);
     vertexBuffers = { skyBoxVertexBuffer->getBuffer() };
-
-    //// loads skybox uniform buffer (moved to UniformSet)
-
-    // more bread crumbs
 
     // initialize UI and input
 
@@ -110,8 +134,6 @@ bool CastleApp::Init()
     {
         return false;
     }
-
-    // start frameIndex
 
     return true;
 }
@@ -128,7 +150,7 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
 
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
-        /// 
+        
         skyBoxTextures = new TextureSet(rootSignature, skyboxTextureParameters);
         skyUniforms =
             new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(UniformBlockSky) } }, totalFrameBuffers);
@@ -153,7 +175,6 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
     {
         /// create pipeline
 
-        //addPipelines();
         skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
     }
 
@@ -164,7 +185,73 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
     return true;
 }
 
-void CastleApp::Unload(ReloadDesc* pReloadDesc) {}
+void CastleApp::Unload(ReloadDesc* pReloadDesc)
+{
+    // wait for idle queue
+
+    graphicsQueue->waitForIdleQueue();
+
+    // unload UI
+
+    UI.unloadUI(pReloadDesc);
+
+    if (pReloadDesc->mType & (RELOAD_TYPE_SHADER | RELOAD_TYPE_RENDERTARGET))
+    {
+        //remove Pipelines
+
+        if (skyBoxDrawPipeline)
+        {
+            delete skyBoxDrawPipeline;
+            skyBoxDrawPipeline = nullptr;
+        }
+    }
+
+    if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
+    {
+        //remove SwapChain
+
+        if (chain)
+        {
+            delete chain;
+            chain = nullptr;        
+        }
+
+        // remove depthBuffer
+
+        if (depthBuffer)
+        {
+            delete depthBuffer;
+            depthBuffer = nullptr;
+        }
+    }
+
+    if (pReloadDesc->mType & RELOAD_TYPE_SHADER)
+    {
+        // remove textures
+
+        if (skyBoxTextures)
+        {
+            delete skyBoxTextures;
+            skyBoxTextures = nullptr;
+        }
+
+        // remove Uniforms
+
+        if (skyUniforms)
+        {
+            delete skyUniforms;
+            skyUniforms = nullptr;
+        }
+
+        // remove rootSignature
+
+        if (rootSignature)
+        {
+            delete rootSignature;
+            rootSignature = nullptr;
+        }
+    }
+}
 
 void CastleApp::Update(float deltaTime)
 {
@@ -207,12 +294,6 @@ void CastleApp::Draw()
 
     elem.waitForFence();
 
-    //if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-    //{
-    //    // Check breadcrumb markers
-    //    checkMarkers();
-    //}
-
     // update uniform
 
     skyUniforms->update(frameIndex, &skyUniformHostBlock, sizeof(UniformBlockSky));
@@ -238,10 +319,6 @@ void CastleApp::Draw()
 
     cmd->recordCommand(&CastleApp::commandsToRecord, &recObjs);
 
-    // simply record the screen cleaning command
-
-    // draw skybox
-
     // Queue Submit
 
     Semaphore* imageAcquiredSemaphore = chain->getImageAcquiredSemaphore();
@@ -250,10 +327,11 @@ void CastleApp::Draw()
     graphicsQueue->submit(cmd, elem.getFence(), &imageAcquiredSemaphore, &waitSemaphore);
 
     // Queue present
-    // &elem.pSemaphore wait
+
     graphicsQueue->present(acquiredImageFromSwapchain.swapchainImageIndex, chain, 1, &waitSemaphore);
 
     // Closing draw, preparing for next image in Swapchain
+
     incrementFrameIndex();
 }
 
@@ -263,78 +341,38 @@ void CastleApp::commandsToRecord(void* data)
     uint32_t              width = pRecObjs->renderTarget->getWidth();
     uint32_t              height = pRecObjs->renderTarget->getHeight();
 
-    // if (pRenderer->pGpu->mSettings.mGpuBreadcrumbs)
-    //{
-    //     // Reset markers values
-    //     resetMarkers(cmd);
-    // }
-
-    // RenderTargetBarrier barriers[] = {
-    //     { pRenderTarget, RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET },
-    // };
-    // cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
     RenderTargetBarrier barriers[] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET };
     pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 
     //// simply record the screen cleaning command
 
-    // BindRenderTargetsDesc bindRenderTargets = {};
-    // bindRenderTargets.mRenderTargetCount = 1;
-    // bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_CLEAR };
-    // bindRenderTargets.mDepthStencil = { pDepthBuffer, LOAD_ACTION_CLEAR };
-    // cmdBindRenderTargets(cmd, &bindRenderTargets);
     pRecObjs->cmd->BindRenderTargetAndClean(pRecObjs->renderTarget, pRecObjs->depthBuffer);
 
-    // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
-
     //// draw skybox
-    // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 1.0f, 1.0f);
+
     pRecObjs->cmd->setViewPort(0, 0, (float)width, (float)height, 1, 1);
 
-    // cmdSetScissor(cmd, 0, 0, pRenderTarget->mWidth, pRenderTarget->mHeight);
     pRecObjs->cmd->setScissor(0, 0, width, height);
 
-    // cmdBindPipeline(cmd, pSkyBoxDrawPipeline);
     pRecObjs->cmd->BindPipeline(pRecObjs->pipeline);
 
-    // cmdBindDescriptorSet(cmd, 0, pDescriptorSetTexture);
     pRecObjs->cmd->BindTextureSet(pRecObjs->textures, 0);
 
-    // cmdBindDescriptorSet(cmd, gFrameIndex * 2 + 0, pDescriptorSetUniforms);
     pRecObjs->cmd->BindUniformSet(pRecObjs->uniforms, pRecObjs->frameIndex * 2 + 0);
 
     const uint32_t skyboxVbStride = sizeof(float) * 4;
 
-    // cmdBindVertexBuffer(cmd, 1, &pSkyBoxVertexBuffer, &skyboxVbStride, NULL);
     pRecObjs->cmd->BindVertexBuffer(1, pRecObjs->vertexBuffer, &skyboxVbStride, NULL);
 
-    // cmdDraw(cmd, 36, 0);
     pRecObjs->cmd->draw(36, 0);
 
-    // cmdSetViewport(cmd, 0.0f, 0.0f, (float)pRenderTarget->mWidth, (float)pRenderTarget->mHeight, 0.0f, 1.0f);
-
-    // bindRenderTargets = {};
-    // bindRenderTargets.mRenderTargetCount = 1;
-    // bindRenderTargets.mRenderTargets[0] = { pRenderTarget, LOAD_ACTION_LOAD };
-    // cmdBindRenderTargets(cmd, &bindRenderTargets);
     pRecObjs->cmd->BindRenderTargetAndLoad(pRecObjs->renderTarget, NULL);
 
-    // cmdDrawUserInterface(cmd);
-
-    // cmdBindRenderTargets(cmd, NULL);
     pRecObjs->cmd->UnbindRenderTarget();
 
-    // barriers[0] = { pRenderTarget, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
-    // cmdResourceBarrier(cmd, 0, NULL, 0, NULL, 1, barriers);
     barriers[0] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
     pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 }
 
 const char* CastleApp::GetName() { return "CastleApp"; }
 
-#else
-void CastleApp::Draw()
-{
-}
-
-#endif

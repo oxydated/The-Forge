@@ -50,4 +50,16 @@ TextureSet::TextureSet(Signature* rootSignature, std::vector<textureParams> para
     updateDescriptorSet(RendererWrapper::getRenderer(), 0, pDescriptorSetTexture, (uint32_t)textures.size(), descParams.data());
 }
 
+TextureSet::~TextureSet()
+{
+    removeDescriptorSet(RendererWrapper::getRenderer(), pDescriptorSetTexture);
+    for (auto& tex : textures)
+    {
+        if (tex)
+        {
+            removeResource(tex);
+        }
+    }
+}
+
 DescriptorSet* TextureSet::getDescriptorSet() { return pDescriptorSetTexture; }

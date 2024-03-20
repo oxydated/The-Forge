@@ -37,6 +37,8 @@ public:
 
     bool CameraSetup(IApp* app);
 
+    void unloadUI(ReloadDesc* pReloadDesc);
+
     void removeCamera();
 
     ICameraController* getCameraController();

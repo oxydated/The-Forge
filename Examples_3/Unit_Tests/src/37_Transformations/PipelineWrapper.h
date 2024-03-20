@@ -18,6 +18,8 @@ public:
 
     Pipeline* getPipeline();
 
+    ~PipelineWrapper();
+
 private:
     Pipeline* pipeline = NULL;
 };

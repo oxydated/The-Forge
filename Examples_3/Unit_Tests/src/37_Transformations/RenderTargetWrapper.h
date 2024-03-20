@@ -14,6 +14,8 @@ public:
 
     RenderTarget* getRenderTarget();
 
+    ~RenderTargetWrapper();
+
     static RenderTargetWrapper* createRenderTargetWrapper(IApp*);
 
     static RenderTargetWrapper* createRenderTargetWrapper(RenderTarget*);

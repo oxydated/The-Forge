@@ -13,6 +13,8 @@ QueueWrapper::QueueWrapper()
     addQueue(RendererWrapper::getRenderer(), &queueDesc, &queue);
 }
 
+QueueWrapper::~QueueWrapper() { removeQueue(RendererWrapper::getRenderer(), queue); }
+
 void QueueWrapper::submit(Command* command, Fence* signalFence, Semaphore** waitSemaphores, Semaphore** signalSemaphores)
 {
     FlushResourceUpdateDesc flushUpdateDesc = {};
@@ -55,6 +57,8 @@ void QueueWrapper::waitForIdleQueue(SwapChainWrapper* chain, IApp* app)
         ::toggleVSync(RendererWrapper::getRenderer(), &pSwapChain);
     }
 }
+
+void QueueWrapper::waitForIdleQueue() { waitQueueIdle(queue); }
 
 Queue* QueueWrapper::getQueue() { return queue; }
 

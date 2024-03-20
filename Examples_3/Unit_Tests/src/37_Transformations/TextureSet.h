@@ -19,6 +19,8 @@ class TextureSet
 public:
     TextureSet(Signature* rootSignature, std::vector<textureParams> params);
 
+    ~TextureSet();
+
     DescriptorSet* getDescriptorSet();
 
 private:

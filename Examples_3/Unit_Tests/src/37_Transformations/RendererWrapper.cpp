@@ -18,3 +18,9 @@ bool RendererWrapper::initRenderer(const char* appName)
         return false;
     return true;
 }
+
+void RendererWrapper::remove()
+{
+    exitRenderer(renderer);
+    renderer = NULL;
+}

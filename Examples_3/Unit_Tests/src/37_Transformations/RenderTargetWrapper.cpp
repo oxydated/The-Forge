@@ -10,6 +10,8 @@ uint32_t RenderTargetWrapper::getHeight() { return renderTarget->mHeight; }
 
 RenderTarget* RenderTargetWrapper::getRenderTarget() { return renderTarget; }
 
+RenderTargetWrapper::~RenderTargetWrapper() { removeRenderTarget(RendererWrapper::getRenderer(), renderTarget); }
+
 RenderTargetWrapper* RenderTargetWrapper::createRenderTargetWrapper(IApp* app)
 {
     // Add depth buffer

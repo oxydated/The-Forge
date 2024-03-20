@@ -51,6 +51,12 @@ SwapChainWrapper* SwapChainWrapper::createSwapChainWrapper(QueueWrapper* queueWr
     return new SwapChainWrapper(newSwapChain, pImageAcquiredSemaphore);
 }
 
+SwapChainWrapper::~SwapChainWrapper()
+{
+    removeSwapChain(RendererWrapper::getRenderer(), swapChain);
+    removeSemaphore(RendererWrapper::getRenderer(), imageAcquiredSemaphore);
+}
+
 SwapChainWrapper::SwapChainWrapper(SwapChain* pSwapChain, Semaphore* pSemaphore): swapChain(pSwapChain), imageAcquiredSemaphore(pSemaphore)
 {
 }

@@ -42,6 +42,18 @@ UniformSet::UniformSet(Signature* rootSignature, std::vector<uniformParams> para
     }
 }
 
+UniformSet::~UniformSet()
+{
+    removeDescriptorSet(RendererWrapper::getRenderer(), pDescriptorSetUniforms);
+    for (auto& buf : uniformBuffers)
+    {
+        if (buf)
+        {
+            removeResource(buf);
+        }
+    }
+}
+
 void UniformSet::update(uint32_t index, const void* source, size_t size)
 {
     // update uniform
