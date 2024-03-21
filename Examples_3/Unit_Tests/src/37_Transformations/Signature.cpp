@@ -29,11 +29,11 @@ Signature::Signature(std::vector<std::string> samplerNames, std::vector<shaderCr
 
 	// load shaders
 
-    int shaderIndex = 0; 
     std::vector<std::string> shaderNames;
     std::vector<Shader*>     shaderVector;
     for (auto& param : shaderParams)
     {
+        int            shaderIndex = 0;
         Shader*        newShader = NULL;
         ShaderLoadDesc shaderDesc = {};
         for (auto& stage : param.shaderStageFileNames)

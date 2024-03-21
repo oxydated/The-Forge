@@ -8,6 +8,17 @@
 #include "ISceneObject.h"
 #include "projections.h"
 
+struct UniformBlockCastle
+{
+    CameraMatrix mProjectView;
+    mat4         mToWorldMat;
+    vec4         mColor;
+
+    // Point Light Information
+    vec3 mLightPosition;
+    vec3 mLightColor;
+};
+
 class CastleObj: public ISceneObject
 {
 public:
@@ -27,12 +38,17 @@ public:
 
     const void* getIndexData();
 
-    uint64_t    getIndexDataSIze();
+    uint64_t getIndexDataSize();
+
+    uint64_t getNumIndexes();
+
+    uint32_t getVertexStride();
 
     void update(float deltaTime, ICameraController* cameraController);
 
 private:
-    IApp*            appHost = nullptr;
-    std::vector<int> vertexIndices;
-    std::vector<std::array<float, 3>> vertices;
+    IApp*                             appHost = nullptr;
+    std::vector<int>                  vertexIndices;
+    std::vector<float>                vertices;
+    UniformBlockCastle                castleUniform = {};
 };

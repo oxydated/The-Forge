@@ -36,6 +36,8 @@ public:
 
     void BindVertexBuffer(uint32_t bufferCount, Buffer** buffers, const uint32_t* strides, const uint64_t offsets);
 
+    void BindIndexBuffer(Buffer* buffer, uint32_t indexType, uint64_t offset);
+
     void ResourceBarrier(uint32_t numBufferBarriers, BufferBarrier*, uint32_t numTextureBarriers, TextureBarrier*,
                          uint32_t numRenderTargetBarriers, RenderTargetBarrier*);
 
@@ -48,6 +50,8 @@ public:
     void submit(QueueWrapper*);
 
     void draw(uint32_t vertexCount, uint32_t firstVertex);
+
+    void drawIndexed(uint32_t indicesCount, uint32_t firstIndex, uint32_t firstVertex);
 
     Cmd* getCommand();
 

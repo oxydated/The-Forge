@@ -15,8 +15,11 @@ struct commandRecordObjects
     PipelineWrapper*     pipeline;
     TextureSet*          textures;
     UniformSet*          uniforms;
+    Buffer**             indexBuffer;
     Buffer**             vertexBuffer;
     uint32_t             frameIndex;
+    uint32_t             indicesCount;
+    uint32_t             vertexStride;
 };
 
 void CastleApp::incrementFrameIndex() { frameIndex = (frameIndex + 1) % totalFrameBuffers; }
@@ -35,6 +38,21 @@ void CastleApp::Exit()
         skyBoxVertexBuffer = nullptr;
     }
     skyBoxVertexBuffers.clear();
+
+    if (castleVertexBuffer)
+    {
+        delete castleVertexBuffer;
+        castleVertexBuffer = nullptr;    
+    }
+    castleVertexBuffers.clear();
+
+    // remove indexBuffer
+
+    if (castleIndexBuffer)
+    {
+        delete castleIndexBuffer;
+        castleIndexBuffer = nullptr;    
+    }
 
     // remove GpuCmdRing
 
@@ -97,10 +115,19 @@ bool CastleApp::Init()
     // init resource loader interface (The Forge stuff)
     initResourceLoaderInterface(RendererWrapper::getRenderer());
 
-    // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
+    // Loads Skybox vertex buffer 
     skyBoxVertexBuffer = new BufferResource(skyBox->getVertexData(), skyBox->getVertexDataSize(), DESCRIPTOR_TYPE_VERTEX_BUFFER,
                                             RESOURCE_MEMORY_USAGE_GPU_ONLY);
     skyBoxVertexBuffers = { skyBoxVertexBuffer->getBuffer() };
+
+    // Loads Castle vertex buffer
+    castleVertexBuffer = new BufferResource(castle->getVertexData(), castle->getVertexDataSize(), DESCRIPTOR_TYPE_VERTEX_BUFFER,
+                                            RESOURCE_MEMORY_USAGE_GPU_ONLY);
+    castleVertexBuffers = { castleVertexBuffer->getBuffer() };
+
+    // Loads Castle index buffer
+    castleIndexBuffer = new BufferResource(castle->getIndexData(), castle->getIndexDataSize(), DESCRIPTOR_TYPE_INDEX_BUFFER,
+                                            RESOURCE_MEMORY_USAGE_GPU_ONLY);
 
     // initialize UI and input
 
@@ -120,7 +147,8 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// load shaders
         /// create RootSignatures
 
-        rootSignature = new Signature({ "uSampler0" }, { { "SkyBoxDrawShader", { "skybox.vert", "skybox.frag" } } });
+        rootSignature = new Signature({ "uSampler0" }, { { "SkyBoxDrawShader", { "skybox.vert", "skybox.frag" } },
+                                                         { "CastleDrawShader", { "basic.vert", "basic.frag" } } });
 
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
@@ -128,6 +156,9 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         skyBoxTextures = new TextureSet(rootSignature, skyBox->getTexturesToLoad());
         skyUniforms =
             new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(skyBox->getUniformDataSize()) } }, totalFrameBuffers);
+
+        castleUniforms =
+            new UniformSet(rootSignature, { { "CastleUniformBuffer", "uniformBlock", castle->getUniformDataSize() } }, totalFrameBuffers);
     }
 
     if (pReloadDesc->mType & (RELOAD_TYPE_RESIZE | RELOAD_TYPE_RENDERTARGET))
@@ -149,10 +180,11 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
     {
         /// create pipelines
 
-        //skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
+        skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", skyBox->getVertexLayout(),
+                                                 chain->getRenderTargetByIndex(0), nullptr, CULL_MODE_NONE);
 
-        skyBoxDrawPipeline =
-            new PipelineWrapper(rootSignature, "SkyBoxDrawShader", skyBox->getVertexLayout(), chain->getRenderTargetByIndex(0), nullptr, CULL_MODE_NONE);
+        castleDrawPipeline = new PipelineWrapper(rootSignature, "CastleDrawShader", castle->getVertexLayout(),
+                                                 chain->getRenderTargetByIndex(0), depthBuffer, CULL_MODE_FRONT);
     }
 
     // UI stuff
@@ -180,6 +212,12 @@ void CastleApp::Unload(ReloadDesc* pReloadDesc)
         {
             delete skyBoxDrawPipeline;
             skyBoxDrawPipeline = nullptr;
+        }
+
+        if (castleDrawPipeline)
+        {
+            delete castleDrawPipeline;
+            castleDrawPipeline = nullptr;
         }
     }
 
@@ -220,6 +258,12 @@ void CastleApp::Unload(ReloadDesc* pReloadDesc)
             skyUniforms = nullptr;
         }
 
+        if (castleUniforms)
+        {
+            delete castleUniforms;
+            castleUniforms = nullptr;
+        }
+
         // remove rootSignature
 
         if (rootSignature)
@@ -243,6 +287,8 @@ void CastleApp::Update(float deltaTime)
     // update objects in scene
     
     skyBox->update(deltaTime, UI.getCameraController());
+
+    castle->update(deltaTime, UI.getCameraController());
 }
 
 CastleApp::CastleApp():IApp() {}
@@ -268,6 +314,8 @@ void CastleApp::Draw()
 
     skyUniforms->update(frameIndex, skyBox->getUniformData(), skyBox->getUniformDataSize());
 
+    castleUniforms->update(frameIndex, castle->getUniformData(), castle->getUniformDataSize());
+
     // Reset cmd pool for this frame
 
     elem.resetCommandPool();
@@ -276,18 +324,36 @@ void CastleApp::Draw()
 
     Command* cmd = elem.getCommandByIndex(0);
 
-    commandRecordObjects recObjs = {};
+    commandRecordObjects skyRecObjs = {};
+    skyRecObjs.cmd = cmd;
+    skyRecObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
+    skyRecObjs.depthBuffer = depthBuffer;
+    skyRecObjs.pipeline = skyBoxDrawPipeline;
+    skyRecObjs.textures = skyBoxTextures;
+    skyRecObjs.uniforms = skyUniforms;
+    skyRecObjs.indexBuffer = nullptr;
+    skyRecObjs.vertexBuffer = skyBoxVertexBuffers.data();
+    skyRecObjs.frameIndex = frameIndex;
 
-    recObjs.cmd = cmd;
-    recObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
-    recObjs.depthBuffer = depthBuffer;
-    recObjs.pipeline = skyBoxDrawPipeline;
-    recObjs.textures = skyBoxTextures;
-    recObjs.uniforms = skyUniforms;
-    recObjs.vertexBuffer = skyBoxVertexBuffers.data();
-    recObjs.frameIndex = frameIndex;
+    Buffer*              localCastleIndexBuffer = castleIndexBuffer->getBuffer();
+    commandRecordObjects castleRecObjs = {};
+    castleRecObjs.cmd = cmd;
+    castleRecObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
+    castleRecObjs.depthBuffer = depthBuffer;
+    castleRecObjs.pipeline = castleDrawPipeline;
+    castleRecObjs.textures = nullptr;
+    castleRecObjs.uniforms = castleUniforms;
+    castleRecObjs.indexBuffer = &localCastleIndexBuffer;
+    castleRecObjs.vertexBuffer = castleVertexBuffers.data();
+    castleRecObjs.frameIndex = frameIndex;
+    castleRecObjs.indicesCount = (uint32_t)castle->getNumIndexes();
+    castleRecObjs.vertexStride = castle->getVertexStride();
 
-    cmd->recordCommand(&CastleApp::commandsToRecord, &recObjs);
+    commandRecordObjects arrayCmdRec[2];
+    arrayCmdRec[0] = skyRecObjs;
+    arrayCmdRec[1] = castleRecObjs;
+
+    cmd->recordCommand(&CastleApp::commandsToRecord, arrayCmdRec);
 
     // Queue Submit
 
@@ -307,41 +373,65 @@ void CastleApp::Draw()
 
 void CastleApp::commandsToRecord(void* data)
 {
-    commandRecordObjects* pRecObjs = static_cast<commandRecordObjects*>(data);
-    uint32_t              width = pRecObjs->renderTarget->getWidth();
-    uint32_t              height = pRecObjs->renderTarget->getHeight();
+    commandRecordObjects* arrayCmdRec = static_cast<commandRecordObjects*>(data);
+    commandRecordObjects& skyRecObjs = arrayCmdRec[0];
+    commandRecordObjects& castleRecObjs = arrayCmdRec[1];
 
-    RenderTargetBarrier barriers[] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET };
-    pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
+
+
+    uint32_t width = skyRecObjs.renderTarget->getWidth();
+    uint32_t height = skyRecObjs.renderTarget->getHeight();
+
+    RenderTargetBarrier barriers[] = { skyRecObjs.renderTarget->getRenderTarget(), RESOURCE_STATE_PRESENT, RESOURCE_STATE_RENDER_TARGET };
+    skyRecObjs.cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 
     //// simply record the screen cleaning command
 
-    pRecObjs->cmd->BindRenderTargetAndClean(pRecObjs->renderTarget, pRecObjs->depthBuffer);
+    skyRecObjs.cmd->BindRenderTargetAndClean(skyRecObjs.renderTarget, skyRecObjs.depthBuffer);
 
     //// draw skybox
 
-    pRecObjs->cmd->setViewPort(0, 0, (float)width, (float)height, 1, 1);
+    skyRecObjs.cmd->setViewPort(0, 0, (float)width, (float)height, 1, 1);
 
-    pRecObjs->cmd->setScissor(0, 0, width, height);
+    skyRecObjs.cmd->setScissor(0, 0, width, height);
 
-    pRecObjs->cmd->BindPipeline(pRecObjs->pipeline);
+    skyRecObjs.cmd->BindPipeline(skyRecObjs.pipeline);
 
-    pRecObjs->cmd->BindTextureSet(pRecObjs->textures, 0);
+    skyRecObjs.cmd->BindTextureSet(skyRecObjs.textures, 0);
 
-    pRecObjs->cmd->BindUniformSet(pRecObjs->uniforms, pRecObjs->frameIndex * 2 + 0);
+    skyRecObjs.cmd->BindUniformSet(skyRecObjs.uniforms, skyRecObjs.frameIndex * 2 + 0);
 
     const uint32_t skyboxVbStride = sizeof(float) * 4;
 
-    pRecObjs->cmd->BindVertexBuffer(1, pRecObjs->vertexBuffer, &skyboxVbStride, NULL);
+    skyRecObjs.cmd->BindVertexBuffer(1, skyRecObjs.vertexBuffer, &skyboxVbStride, NULL);
 
-    pRecObjs->cmd->draw(36, 0);
+    skyRecObjs.cmd->draw(36, 0);
 
-    pRecObjs->cmd->BindRenderTargetAndLoad(pRecObjs->renderTarget, NULL);
+    //// draw castle
 
-    pRecObjs->cmd->UnbindRenderTarget();
+    castleRecObjs.cmd->setViewPort(0, 0, (float)width, (float)height, 0, 1);
 
-    barriers[0] = { pRecObjs->renderTarget->getRenderTarget(), RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
-    pRecObjs->cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
+    castleRecObjs.cmd->BindPipeline(castleRecObjs.pipeline);
+
+    castleRecObjs.cmd->BindUniformSet(castleRecObjs.uniforms, skyRecObjs.frameIndex * 2 + 0);
+
+    castleRecObjs.cmd->BindIndexBuffer(castleRecObjs.indexBuffer[0], INDEX_TYPE_UINT32, 0);
+
+    const uint32_t castleStride = castleRecObjs.vertexStride;
+
+    castleRecObjs.cmd->BindVertexBuffer(1, castleRecObjs.vertexBuffer, &castleStride, NULL);
+
+    castleRecObjs.cmd->drawIndexed(castleRecObjs.indicesCount, 0, 0);
+    //castleRecObjs.cmd->draw(1000, 0);
+
+    ////
+
+    skyRecObjs.cmd->BindRenderTargetAndLoad(skyRecObjs.renderTarget, NULL);
+
+    skyRecObjs.cmd->UnbindRenderTarget();
+
+    barriers[0] = { skyRecObjs.renderTarget->getRenderTarget(), RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_PRESENT };
+    skyRecObjs.cmd->ResourceBarrier(0, NULL, 0, NULL, 1, barriers);
 }
 
 const char* CastleApp::GetName() { return "Castle"; }

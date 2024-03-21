@@ -22,7 +22,7 @@ VSOutput VS_MAIN( VSInput In, SV_InstanceID(uint) InstanceID )
     
     Out.Position = mul(Get(mvp), In.Position);
 
-    float4 pos = float4(In.Position.xyz, 1.0f);
+    float4 pos = float4(In.Position.xyz, 1.0f)
 
     float lightIntensity = 1.0f;
     float ambientCoeff = 0.4;

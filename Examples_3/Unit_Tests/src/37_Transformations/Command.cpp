@@ -45,6 +45,8 @@ void Command::BindVertexBuffer(uint32_t bufferCount, Buffer** buffers, const uin
     cmdBindVertexBuffer(cmd, 1, buffers, strides, NULL);
 }
 
+void Command::BindIndexBuffer(Buffer* buffer, uint32_t indexType, uint64_t offset) { cmdBindIndexBuffer(cmd, buffer, indexType, offset); }
+
 void Command::ResourceBarrier(uint32_t numBufferBarriers, BufferBarrier* bufferBarriers, uint32_t numTextureBarriers, TextureBarrier* textureBarriers,
                               uint32_t numRenderTargetBarriers, RenderTargetBarrier* renderTargetBarriers)
 {
@@ -68,5 +70,10 @@ void Command::recordCommand(std::function<void(void*)> commandsToRecord, void* d
 }
 
 void Command::draw(uint32_t vertexCount, uint32_t firstVertex) { cmdDraw(cmd, vertexCount, firstVertex); }
+
+void Command::drawIndexed(uint32_t indicesCount, uint32_t firstIndex, uint32_t firstVertex)
+{
+    cmdDrawIndexed(cmd, indicesCount, firstIndex, firstVertex);
+}
 
 Cmd* Command::getCommand() { return cmd; }

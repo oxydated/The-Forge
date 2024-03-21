@@ -35,13 +35,15 @@ private:
     TextureSet*          skyBoxTextures = NULL;
     UniformSet*          skyUniforms = NULL;
     BufferResource*      skyBoxVertexBuffer = NULL;
-
-    PipelineWrapper* planetsDrawPipeline = NULL;
-    UniformSet*      planetsUniforms = NULL;
-    BufferResource*  planetsVertexBuffer = NULL;
     std::vector<Buffer*> skyBoxVertexBuffers;
 
-    Signature*           rootSignature = NULL;
+    PipelineWrapper*     castleDrawPipeline = NULL;
+    UniformSet*          castleUniforms = NULL;
+    BufferResource*      castleIndexBuffer = NULL;
+    BufferResource*      castleVertexBuffer = NULL;
+    std::vector<Buffer*> castleVertexBuffers;
+
+    Signature* rootSignature = NULL;
 
     // User Interface
     UserInterfaceWrapper UI;
