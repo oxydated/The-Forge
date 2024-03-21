@@ -18,6 +18,7 @@
 #include "UserInterfaceWrapper.h"
 
 #include "SkyBoxObj.h"
+#include "CastleObj.h"
 
 class CastleApp: public IApp
 {
@@ -29,10 +30,17 @@ private:
     QueueWrapper*        graphicsQueue = NULL;
     SwapChainWrapper*    chain = NULL;
     RenderTargetWrapper* depthBuffer = NULL;
+
     PipelineWrapper*     skyBoxDrawPipeline = NULL;
     TextureSet*          skyBoxTextures = NULL;
     UniformSet*          skyUniforms = NULL;
     BufferResource*      skyBoxVertexBuffer = NULL;
+
+    PipelineWrapper* planetsDrawPipeline = NULL;
+    UniformSet*      planetsUniforms = NULL;
+    BufferResource*  planetsVertexBuffer = NULL;
+    std::vector<Buffer*> skyBoxVertexBuffers;
+
     Signature*           rootSignature = NULL;
 
     // User Interface
@@ -40,7 +48,6 @@ private:
 
     // Buffers
 
-    std::vector<Buffer*> vertexBuffers;
 
     // frame couting
 
@@ -50,6 +57,7 @@ private:
     // Scene objects
 
     SkyBoxObj* skyBox = NULL;
+    CastleObj* castle = NULL;
 
     void incrementFrameIndex();
 

@@ -34,7 +34,7 @@ void CastleApp::Exit()
         delete skyBoxVertexBuffer;
         skyBoxVertexBuffer = nullptr;
     }
-    vertexBuffers.clear();
+    skyBoxVertexBuffers.clear();
 
     // remove GpuCmdRing
 
@@ -79,6 +79,7 @@ bool CastleApp::Init()
     // Initialize scene Objects
 
     skyBox = new SkyBoxObj(this);
+    castle = new CastleObj(this);
 
     // window and renderer setup
     // check for init success
@@ -99,7 +100,7 @@ bool CastleApp::Init()
     // Loads Skybox vertex buffer (creates it from the global array defined somewhere else) and creates the vertexBuffer resource
     skyBoxVertexBuffer = new BufferResource(skyBox->getVertexData(), skyBox->getVertexDataSize(), DESCRIPTOR_TYPE_VERTEX_BUFFER,
                                             RESOURCE_MEMORY_USAGE_GPU_ONLY);
-    vertexBuffers = { skyBoxVertexBuffer->getBuffer() };
+    skyBoxVertexBuffers = { skyBoxVertexBuffer->getBuffer() };
 
     // initialize UI and input
 
@@ -146,7 +147,7 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
 
     if (pReloadDesc->mType & (RELOAD_TYPE_SHADER | RELOAD_TYPE_RENDERTARGET))
     {
-        /// create pipeline
+        /// create pipelines
 
         //skyBoxDrawPipeline = new PipelineWrapper(rootSignature, "SkyBoxDrawShader", chain->getRenderTargetByIndex(0), depthBuffer);
 
@@ -283,7 +284,7 @@ void CastleApp::Draw()
     recObjs.pipeline = skyBoxDrawPipeline;
     recObjs.textures = skyBoxTextures;
     recObjs.uniforms = skyUniforms;
-    recObjs.vertexBuffer = vertexBuffers.data();
+    recObjs.vertexBuffer = skyBoxVertexBuffers.data();
     recObjs.frameIndex = frameIndex;
 
     cmd->recordCommand(&CastleApp::commandsToRecord, &recObjs);

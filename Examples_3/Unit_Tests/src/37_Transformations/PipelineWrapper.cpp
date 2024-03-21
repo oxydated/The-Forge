@@ -13,17 +13,6 @@ PipelineWrapper::PipelineWrapper(Signature* rootSignature, std::string shaderNam
     RasterizerStateDesc rasterizerStateDesc = {};
     rasterizerStateDesc.mCullMode = cullingMode;
 
-    // layout and pipeline for skybox draw
-    //VertexLayout vertexLayout = {};
-    //vertexLayout.mBindingCount = 1;
-    //vertexLayout.mBindings[0].mStride = sizeof(float4);
-    //vertexLayout.mAttribCount = 1;
-    //vertexLayout.mAttribs[0].mSemantic = SEMANTIC_POSITION;
-    //vertexLayout.mAttribs[0].mFormat = TinyImageFormat_R32G32B32A32_SFLOAT;
-    //vertexLayout.mAttribs[0].mBinding = 0;
-    //vertexLayout.mAttribs[0].mLocation = 0;
-    //vertexLayout.mAttribs[0].mOffset = 0;
-
     RenderTarget* swapChainRenderTarget = swapChainRT->getRenderTarget();
 
     GraphicsPipelineDesc pipelineSettings = {};
@@ -37,7 +26,7 @@ PipelineWrapper::PipelineWrapper(Signature* rootSignature, std::string shaderNam
     ;
     pipelineSettings.mVRFoveatedRendering = true;
     pipelineSettings.pRasterizerState = &rasterizerStateDesc;
-    pipelineSettings.pShaderProgram = rootSignature->getShaderByName(shaderName); //-V519
+    pipelineSettings.pShaderProgram = rootSignature->getShaderByName(shaderName);
 
     DepthStateDesc depthStateDesc = {};
 

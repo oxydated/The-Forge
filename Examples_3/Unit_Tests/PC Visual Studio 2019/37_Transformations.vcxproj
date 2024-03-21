@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\37_Transformations\BufferResource.cpp" />
     <ClCompile Include="..\src\37_Transformations\CastleApp.cpp" />
+    <ClCompile Include="..\src\37_Transformations\CastleObj.cpp" />
     <ClCompile Include="..\src\37_Transformations\CmdRing.cpp" />
     <ClCompile Include="..\src\37_Transformations\CmdRingElement.cpp" />
     <ClCompile Include="..\src\37_Transformations\Command.cpp" />
@@ -45,6 +46,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\37_Transformations\BufferResource.h" />
     <ClInclude Include="..\src\37_Transformations\CastleApp.h" />
+    <ClInclude Include="..\src\37_Transformations\CastleObj.h" />
     <ClInclude Include="..\src\37_Transformations\CmdRing.h" />
     <ClInclude Include="..\src\37_Transformations\CmdRingElement.h" />
     <ClInclude Include="..\src\37_Transformations\Command.h" />
@@ -98,6 +100,7 @@
     <IntDir>$(SolutionDir)\$(Platform)\$(Configuration)\Intermediate\$(ProjectName)\</IntDir>
     <LibraryPath>$(SolutionDir)\$(Platform)\$(Configuration);$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IncludePath>$(SolutionDir)include\fbx;$(SolutionDir)include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -118,7 +121,7 @@
       <SubSystem>Windows</SubSystem>
       <AdditionalOptions>/ENTRY:mainCRTStartup %(AdditionalOptions)</AdditionalOptions>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
-      <AdditionalDependencies>Xinput9_1_0.lib;ws2_32.lib;gainputstatic.lib;Renderer.lib;OS.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Xinput9_1_0.lib;ws2_32.lib;gainputstatic.lib;Renderer.lib;OS.lib;libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099</AdditionalOptions>
     </Link>
     <Manifest>
