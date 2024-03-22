@@ -7,6 +7,8 @@
 STRUCT(VSInput)
 {
 	DATA(float4, Position, POSITION);
+	DATA(float3, Normal, NORMAL);
+    DATA(float3, TexCoord, TEXCOORD);
 };
 
 STRUCT(VSOutput)
@@ -34,14 +36,11 @@ VSOutput VS_MAIN( VSInput In, SV_InstanceID(uint) InstanceID )
     else
         lightDir = normalize(Get(lightPosition) - pos.xyz);
 
-
-
     float3 baseColor = Get(color).xyz;
     float3 blendedColor = (Get(lightColor) * baseColor) * lightIntensity;
     float3 ambient = baseColor * ambientCoeff;
 
-
-    Out.Color = float4( ambient, 1.0);
+    Out.Color = float4( In.Normal, 1.0);
 
     RETURN(Out);
 }

@@ -19,6 +19,13 @@ struct UniformBlockCastle
     vec3 mLightColor;
 };
 
+struct vertexFormat
+{
+    float4 position;
+    float3 normal;
+    float3 UVW;
+};
+
 class CastleObj: public ISceneObject
 {
 public:
@@ -49,6 +56,6 @@ public:
 private:
     IApp*                             appHost = nullptr;
     std::vector<int>                  vertexIndices;
-    std::vector<float>                vertices;
+    std::vector<vertexFormat>         vertices;
     UniformBlockCastle                castleUniform = {};
 };

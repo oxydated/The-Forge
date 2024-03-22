@@ -7,7 +7,7 @@
 struct meshDescription
 {
     std::vector<int> indices;
-    std::vector<float> vertices;
+    std::vector<vertexFormat> vertices;
 };
 
 struct vertexDescription
@@ -18,25 +18,11 @@ struct vertexDescription
 
 meshDescription processFBXMesh(FbxMesh* mesh)
 {
-    std::vector<vertexDescription> polygonVertices;
+    //std::vector<vertexDescription> polygonVertices;
 
-    std::vector<float> rawVertices;
+    std::vector<vertexFormat> rawVertices;
 
     meshDescription meshDescript = {};
-
-    int maxIndex = -1;
-    for (int i = 0; i < mesh->GetPolygonCount(); i++)
-    {
-        int polySize = mesh->GetPolygonSize(i);
-        {
-            for (int j = 0; j < polySize; j++)
-            {
-                int vertexIndex = mesh->GetPolygonVertex(i, j);
-                maxIndex = maxIndex > vertexIndex ? maxIndex : vertexIndex;
-                meshDescript.indices.push_back(vertexIndex);
-            }
-        }
-    }
 
     int*             rawIndices = mesh->GetPolygonVertices();
     uint32_t         rawIndicesCount = mesh->GetPolygonCount() * 3;
@@ -50,18 +36,50 @@ meshDescription processFBXMesh(FbxMesh* mesh)
     int         numVertices = mesh->GetControlPointsCount();
     for (int i = 0; i < numVertices; i++)
     {
-        rawVertices.push_back((float)controlPoints[i][0]);
-        rawVertices.push_back((float)controlPoints[i][1]);
-        rawVertices.push_back((float)controlPoints[i][2]);
-        rawVertices.push_back(1.0f);
+        vertexFormat newVertex = {};
+
+        newVertex.position = { (float)controlPoints[i][0], (float)controlPoints[i][1], (float)controlPoints[i][2], 1.0f };
+
+        rawVertices.push_back(newVertex);
     }
 
-    // meshDescript.vertices.resize(numVertices);
-    // for (int i = 0; i < numVertices; i++)
-    //{
-    //     meshDescript.vertices[i] = { (float)controlPoints[i][0], (float)controlPoints[i][1], (float)controlPoints[i][2],
-    //                                  (float)controlPoints[i][3] };
-    // }
+    FbxStringList UVSetNames;
+    mesh->GetUVSetNames(UVSetNames);
+
+    bool hasNormal = mesh->GetElementNormalCount() > 0;
+    bool hasUV = mesh->GetElementUVCount() > 0;
+
+    if (hasNormal)
+    {
+        for (int i = 0; i < mesh->GetPolygonCount(); i++)
+        {
+            int polySize = mesh->GetPolygonSize(i);
+            for (int j = 0; j < polySize; j++)
+            {
+                FbxVector4 newNormal;
+                int        vertexIndex = mesh->GetPolygonVertex(i, j);
+                mesh->GetPolygonVertexNormal(i, j, newNormal);
+                rawVertices[vertexIndex].normal = { (float)newNormal[0], (float)newNormal[1], (float)newNormal[2] };
+            }
+        }
+    }
+    if (hasUV)
+    {
+        const char* UVSetName = UVSetNames[0];
+
+        for (int i = 0; i < mesh->GetPolygonCount(); i++)
+        {
+            int polySize = mesh->GetPolygonSize(i);
+            for (int j = 0; j < polySize; j++)
+            {
+                bool       doesTheVertexHaveUV = true;
+                FbxVector2 newUV;
+                int        vertexIndex = mesh->GetPolygonVertex(i, j);
+                mesh->GetPolygonVertexUV(i, j, UVSetName, newUV, doesTheVertexHaveUV);
+                rawVertices[vertexIndex].UVW = { (float)newUV[0], (float)newUV[1], (float)newUV[2] };
+            }
+        }
+    }
 
     return { rawIndicesVector, rawVertices };
 }
@@ -140,15 +158,14 @@ CastleObj::CastleObj(IApp* app): appHost(app)
 
     lImporter->Import(lScene);
 
-    std::vector<FbxMesh*> meshes = exploreFBXSceneTree(lScene);
-    meshDescription       meshDesc = processFBXMesh(meshes[0]);
-    vertexIndices = meshDesc.indices;
-    vertices = meshDesc.vertices;
-
-    //FbxGeometryConverter lGeomConverter(lSdkManager);
-    //if (lGeomConverter.Triangulate(lScene, true))
-    //{
-    //}
+    FbxGeometryConverter lGeomConverter(lSdkManager);
+    if (lGeomConverter.Triangulate(lScene, true))
+    {
+        std::vector<FbxMesh*> meshes = exploreFBXSceneTree(lScene);
+        meshDescription       meshDesc = processFBXMesh(meshes[0]);
+        vertexIndices = meshDesc.indices;
+        vertices = meshDesc.vertices;
+    }
 
     lImporter->Destroy();
 }
@@ -157,7 +174,7 @@ std::vector<textureParams> CastleObj::getTexturesToLoad() { return std::vector<t
 
 const void* CastleObj::getVertexData() { return vertices.data(); }
 
-uint64_t CastleObj::getVertexDataSize() { return vertices.size() * sizeof(float); }
+uint64_t CastleObj::getVertexDataSize() { return vertices.size() * sizeof(vertexFormat); }
 
 const void* CastleObj::getUniformData() { return (void*)&castleUniform; }
 
@@ -168,13 +185,28 @@ VertexLayout CastleObj::getVertexLayout()
     VertexLayout vertexLayout = {};
     vertexLayout = {};
     vertexLayout.mBindingCount = 1;
-    vertexLayout.mBindings[0].mStride = sizeof(float4);
-    vertexLayout.mAttribCount = 1;
+    vertexLayout.mAttribCount = 3;
+
+    vertexLayout.mBindings[0].mStride = sizeof(vertexFormat);
+
     vertexLayout.mAttribs[0].mSemantic = SEMANTIC_POSITION;
     vertexLayout.mAttribs[0].mFormat = TinyImageFormat_R32G32B32A32_SFLOAT;
     vertexLayout.mAttribs[0].mBinding = 0;
     vertexLayout.mAttribs[0].mLocation = 0;
     vertexLayout.mAttribs[0].mOffset = 0;
+
+    vertexLayout.mAttribs[1].mSemantic = SEMANTIC_NORMAL;
+    vertexLayout.mAttribs[1].mFormat = TinyImageFormat_R32G32B32_SFLOAT;
+    vertexLayout.mAttribs[1].mBinding = 0;
+    vertexLayout.mAttribs[1].mLocation = 1;
+    vertexLayout.mAttribs[1].mOffset = vertexLayout.mAttribs[0].mOffset + sizeof(float4);
+
+    vertexLayout.mAttribs[2].mSemantic = SEMANTIC_TEXCOORD0;
+    vertexLayout.mAttribs[2].mFormat = TinyImageFormat_R32G32B32_SFLOAT;
+    vertexLayout.mAttribs[2].mBinding = 0;
+    vertexLayout.mAttribs[2].mLocation = 2;
+    vertexLayout.mAttribs[2].mOffset = vertexLayout.mAttribs[1].mOffset + sizeof(float3);
+
     return vertexLayout;
 }
 
@@ -184,7 +216,7 @@ uint64_t CastleObj::getIndexDataSize() { return vertexIndices.size() * sizeof(in
 
 uint64_t CastleObj::getNumIndexes() { return vertexIndices.size(); }
 
-uint32_t CastleObj::getVertexStride() { return sizeof(float) * 4; }
+uint32_t CastleObj::getVertexStride() { return sizeof(vertexFormat); }
 
 void CastleObj::update(float deltaTime, ICameraController* cameraController) {
    

@@ -51,12 +51,12 @@ void UserInterfaceWrapper::loadUI(ReloadDesc* pReloadDesc, IApp* app, RenderTarg
     fontLoad.mLoadType = pReloadDesc->mType;
     loadFontSystem(&fontLoad);
 
-    initScreenshotInterface(RendererWrapper::getRenderer(), queueWrapper->getQueue());
+    //initScreenshotInterface(RendererWrapper::getRenderer(), queueWrapper->getQueue());
 }
 
 void UserInterfaceWrapper::ExitUIAlternative()
 {
-    exitScreenshotInterface();
+    //exitScreenshotInterface();
     removeCamera();
     exitUserInterface();
     exitFontSystem();
