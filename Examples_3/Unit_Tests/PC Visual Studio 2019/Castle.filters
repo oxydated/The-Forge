@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src\Castle">
+      <UniqueIdentifier>{d4f3052c-9558-42ba-9c5f-371ad13a1e65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{9fef938b-42be-4dff-9474-04c4551a62c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle\Shaders\FSL">
+      <UniqueIdentifier>{c2c1e520-03fe-4cb9-87b0-0f11945e98c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle\Shaders">
+      <UniqueIdentifier>{6734346a-6efd-4eaf-95ea-23ada6d92232}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTestResources\Scripts">
+      <UniqueIdentifier>{c5778d13-3750-41dc-be98-712a2a3183e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTestResources">
+      <UniqueIdentifier>{657f946c-1d94-4ca5-851a-710dc86c6ab0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Castle\CastleApp.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\basic.frag.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\basic.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\crash.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\resources.h.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\ShaderList.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\skybox.frag.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\skybox.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <None Include="..\UnitTestResources\Scripts\TestBorderless.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestCenteredWindow.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestFullScreen.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestNonCenteredWindow.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+  </ItemGroup>
+</Project>

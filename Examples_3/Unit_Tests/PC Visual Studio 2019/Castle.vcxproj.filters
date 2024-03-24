@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\Castle\CastleApp.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\UniformSet.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\Command.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\CmdRingElement.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\CmdRing.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\QueueWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\SwapChainWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\RendererWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\RenderTargetWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\PipelineWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\TextureSet.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\BufferResource.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\Signature.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\UserInterfaceWrapper.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\CastleObj.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Castle\SkyBoxObj.cpp">
+      <Filter>src\Castle</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\UnitTestResources\Scripts\TestBorderless.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestCenteredWindow.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestFullScreen.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+    <None Include="..\UnitTestResources\Scripts\TestNonCenteredWindow.lua">
+      <Filter>UnitTestResources\Scripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="UnitTestResources">
+      <UniqueIdentifier>{41c21307-059b-4419-ba24-527cfbdbf5af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UnitTestResources\Scripts">
+      <UniqueIdentifier>{7e1fb708-a2ea-4cd8-8d63-2212841baf89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{3684f0a2-c4f9-4885-b919-c4cc46358a58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="headers">
+      <UniqueIdentifier>{f83517f4-8836-4bb8-a63f-b83a2bbeedf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle">
+      <UniqueIdentifier>{047a5b53-cfde-4fa9-8720-e3d164410147}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle\Shaders">
+      <UniqueIdentifier>{737703b1-1c15-445b-a0b2-babee2c5d8c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle\Shaders\FSL">
+      <UniqueIdentifier>{36123f4b-229e-4fe2-9aec-e3a9a7c643b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Castle\headers">
+      <UniqueIdentifier>{cde60d6b-3785-4c4c-9296-8a614900204f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Castle\CastleApp.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\PipelineWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\CmdRing.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\CmdRingElement.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\Command.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\QueueWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\IResourceSet.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\Signature.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\RenderTargetWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\BufferResource.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\RendererWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\SwapChainWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\SemaphoreWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\IAppCommand.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\TextureSet.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\UniformSet.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\projections.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\UserInterfaceWrapper.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\ISceneObject.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\SkyBoxObj.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\CastleObj.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\resources.h.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\resourcesCastle.h.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\ShaderList.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\skybox.frag.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\skybox.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\basic.frag.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\basic.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\castle.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+    <FSLShader Include="..\src\Castle\Shaders\FSL\crash.vert.fsl">
+      <Filter>src\Castle\Shaders\FSL</Filter>
+    </FSLShader>
+  </ItemGroup>
+</Project>

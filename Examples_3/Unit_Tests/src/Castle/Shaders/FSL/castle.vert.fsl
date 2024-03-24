@@ -1,0 +1,69 @@
+/*
+
+*/
+
+#include "resourcesCastle.h.fsl"
+
+STRUCT(VSInput)
+{
+	DATA(float4, Position, POSITION);
+	DATA(float3, Normal, NORMAL);
+    DATA(float3, TexCoord, TEXCOORD);
+};
+
+STRUCT(VSOutput)
+{
+	DATA(float4, Position, SV_Position);
+    DATA(float3, lightPosition, none);
+    DATA(float3, Normal, NORMAL);
+	DATA(float4, Color,    COLOR);
+	DATA(float3, TexCoord, TEXCOORD);
+    DATA(float3, WorldPosition, TEXCOORD2);
+};
+
+VSOutput VS_MAIN( VSInput In, SV_InstanceID(uint) InstanceID )
+{
+    INIT_MAIN;
+    VSOutput Out;
+
+    // Diffuse lighting
+
+    float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.Position.xyz);
+    float diffuselightIntensity = clamp(dot(LightVectorWorldSpace, In.Normal), 0.0, 1.0);
+    float4 finalColor = float4(1.0, 1.0, 1.0, 1.0) * diffuselightIntensity;
+
+    Out.WorldPosition = In.Position.xyz;
+    Out.lightPosition = Get(lightPosition);
+    Out.Normal = In.Normal;
+
+    ///
+    
+    Out.Position = mul(Get(mvp), In.Position);
+    float4 normal = normalize(mul(Get(normalMat), float4(In.Normal, 1.0f)));
+
+    float3 InColor = Get(color).xyz;
+
+    float4 pos = float4(In.Position.xyz, 1.0f);
+    float4 modelViewPos = mul(Get(modelView), In.Position);
+
+    float lightIntensity = 1.0f;
+    float ambientCoeff = 0.2;
+
+    float3 lightDir;
+
+    float3 lightPosInCameraSpace = mul(Get(modelView), float4(Get(lightPosition), 1.0)).xyz;
+
+    lightDir = normalize(lightPosInCameraSpace - modelViewPos.xyz);
+
+    float3 baseColor = (Get(color).xyz + InColor) / 2.0;
+    float3 blendedColor = (Get(lightColor) * baseColor) * lightIntensity;
+    float3 diffuse = blendedColor * max(dot(normal.xyz, lightDir), 0.0);
+    float3 ambient = InColor * ambientCoeff;
+    //Out.Color = float4(In.Normal, 1.0);
+
+    Out.Color = finalColor;
+
+    Out.TexCoord = In.TexCoord;
+
+    RETURN(Out);
+}
