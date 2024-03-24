@@ -15,7 +15,7 @@ That said, for this assignment I decided to write a class hierachy on top of The
 
 The class hierarchy devised for this project is based on the following conceptual map I made to help understand how The Forge is organized:
 
-![Conceptual Map for The Forge](Images/conceptual_map_The_Forge.svg)
+![Conceptual Map for The Forge](Images/conceptual_map_The_Forge.png)
 
 ## Rendering the Castle
 
