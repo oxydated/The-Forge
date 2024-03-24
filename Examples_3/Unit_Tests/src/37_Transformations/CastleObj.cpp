@@ -3,6 +3,8 @@
 #include <exception>
 #include <stack>
 #include <array>
+#include <cmath>
+#include <iterator>
 
 struct meshDescription
 {
@@ -16,77 +18,127 @@ struct vertexDescription
     std::array<float, 4> vertexCoord;
 };
 
-meshDescription processFBXMesh(FbxMesh* mesh)
+struct vertexFromMesh   // for mesh building. It considers repeating instances from the same vertex.
 {
-    //std::vector<vertexDescription> polygonVertices;
+    int indexInMesh;
+    int indexInPoly;
+    int polygonIndex;
 
+    vertexFormat vertex;
+};
+
+meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
+{
     std::vector<vertexFormat> rawVertices;
+    std::vector<int>          rawIndicesVector;
 
-    meshDescription meshDescript = {};
-
-    int*             rawIndices = mesh->GetPolygonVertices();
-    uint32_t         rawIndicesCount = mesh->GetPolygonCount() * 3;
-    std::vector<int> rawIndicesVector;
-    for (uint32_t i = 0; i < rawIndicesCount; i++)
-    {
-        rawIndicesVector.push_back(rawIndices[i]);
-    }
-
-    FbxVector4* controlPoints = mesh->GetControlPoints();
-    int         numVertices = mesh->GetControlPointsCount();
-    for (int i = 0; i < numVertices; i++)
-    {
-        vertexFormat newVertex = {};
-
-        newVertex.position = { (float)controlPoints[i][0], (float)controlPoints[i][1], (float)controlPoints[i][2], 1.0f };
-
-        rawVertices.push_back(newVertex);
-    }
-
-    FbxStringList UVSetNames;
+    FbxStringList             UVSetNames;
     mesh->GetUVSetNames(UVSetNames);
 
     bool hasNormal = mesh->GetElementNormalCount() > 0;
     bool hasUV = mesh->GetElementUVCount() > 0;
 
-    if (hasNormal)
-    {
-        for (int i = 0; i < mesh->GetPolygonCount(); i++)
-        {
-            int polySize = mesh->GetPolygonSize(i);
-            for (int j = 0; j < polySize; j++)
-            {
-                FbxVector4 newNormal;
-                int        vertexIndex = mesh->GetPolygonVertex(i, j);
-                mesh->GetPolygonVertexNormal(i, j, newNormal);
-                rawVertices[vertexIndex].normal = { (float)newNormal[0], (float)newNormal[1], (float)newNormal[2] };
-            }
-        }
-    }
+    const char* UVSetName = nullptr;
     if (hasUV)
     {
-        const char* UVSetName = UVSetNames[0];
+        UVSetName = UVSetNames[0];
+    }
 
-        for (int i = 0; i < mesh->GetPolygonCount(); i++)
+    FbxVector4* controlPoints = mesh->GetControlPoints();
+
+    FbxGeometryElementNormal*        elementNormal = mesh->GetElementNormal();
+    FbxGeometryElement::EMappingMode normalMappingMode = elementNormal->GetMappingMode();
+    FbxGeometryElement::EReferenceMode normalReferenceMode = elementNormal->GetReferenceMode();
+
+    FbxGeometryElementUV* elementUV = mesh->GetElementUV();
+    FbxGeometryElement::EMappingMode UVMappingMode = elementUV->GetMappingMode();
+    FbxGeometryElement::EReferenceMode UVReferenceMode = elementUV->GetReferenceMode();
+
+    /// In the case any of UVMappingMode or normalMapping mode is set to anything but eByControlPoint, each polygon vertex will be exported as an individual vertex in the mesh
+    /// 
+    /// In a real game development scenario, the model castle.fbx should undergo further refinement so the adjacency of its polygons and vertex sharing information could be preserved.
+    
+    if (UVMappingMode != FbxGeometryElement::eByControlPoint || normalMappingMode != FbxGeometryElement::eByControlPoint)
+    {
+        int polyCount = mesh->GetPolygonCount();
+
+        FbxVector4* meshPoints = mesh->GetControlPoints();
+
+        int indexCounter = 0;
+
+        for (int i = 0; i < polyCount; i++)
         {
-            int polySize = mesh->GetPolygonSize(i);
-            for (int j = 0; j < polySize; j++)
+            int numVerticesInPoly = mesh->GetPolygonSize(i);
+            for (int j = 0; j < numVerticesInPoly; j++)
             {
-                bool       doesTheVertexHaveUV = true;
-                FbxVector2 newUV;
-                int        vertexIndex = mesh->GetPolygonVertex(i, j);
-                mesh->GetPolygonVertexUV(i, j, UVSetName, newUV, doesTheVertexHaveUV);
-                rawVertices[vertexIndex].UVW = { (float)newUV[0], (float)newUV[1], (float)newUV[2] };
+                vertexFromMesh newVertex = {};
+
+                newVertex.polygonIndex = i;
+                newVertex.indexInPoly = j;
+
+                newVertex.indexInMesh = mesh->GetPolygonVertex(i, j);
+
+                FbxVector4 polNormal = FbxVector4();
+                if (hasNormal)
+                    mesh->GetPolygonVertexNormal(i, j, polNormal);
+                newVertex.vertex.normal = { (float)polNormal[0], (float)polNormal[1], (float)polNormal[2] };
+
+                FbxVector2 polUV = FbxVector2();
+                bool       unmapped = false;
+                if (hasUV)
+                    mesh->GetPolygonVertexUV(i, j, UVSetName, polUV, unmapped);
+                newVertex.vertex.UVW = { (float)polUV[0], 1.0f - (float)polUV[1], (float)textureIndex };
+
+                FbxVector4 polPoint = meshPoints[newVertex.indexInMesh];
+                newVertex.vertex.position = { (float)polPoint[0], (float)polPoint[1], (float)polPoint[2], 1.0f };
+
+                rawVertices.push_back(newVertex.vertex);
+                rawIndicesVector.push_back(indexCounter++);
             }
         }
     }
+    
+    /// No need for a indexBuffer for this model as the vertices in the vertexBuffer map directly to the mesh's triangles vertices (one to one relationship)
+    /// Keeping it here anyway as a reference on how to use the indexBuffer if necessary
 
     return { rawIndicesVector, rawVertices };
 }
 
-std::vector<FbxMesh*> exploreFBXSceneTree(FbxScene* scene)
+meshDescription combineMeshes(std::vector<meshDescription>& meshes)
 {
-    std::vector<FbxMesh*>     meshes;
+    meshDescription combinedMesh = {};
+
+    if (meshes.size() > 1)
+    {
+        uint32_t sizeOfPrevious = 0;
+        for (int i = 0; i < meshes.size(); i++)
+        {
+            if (i > 0)
+            {
+                for (int j = 0; j < meshes[i].indices.size(); j++)
+                {
+                    meshes[i].indices[j] += sizeOfPrevious;
+                }
+            }
+            sizeOfPrevious += (uint32_t)meshes[i].indices.size();
+
+            combinedMesh.indices.insert(combinedMesh.indices.end(), std::make_move_iterator(meshes[i].indices.begin()),
+                                        std::make_move_iterator(meshes[i].indices.end()));
+            combinedMesh.vertices.insert(combinedMesh.vertices.end(), std::make_move_iterator(meshes[i].vertices.begin()),
+                                         std::make_move_iterator(meshes[i].vertices.end()));
+        }
+    }
+    if (meshes.size() == 1)
+    {
+        return meshes[0];    
+    }
+
+    return combinedMesh;
+}
+
+std::vector<FbxNode*> exploreFBXSceneTree(FbxScene* scene)
+{
+    std::vector<FbxNode*> meshNodes;
     std::stack<FbxNode*> nodeStack;
 
     FbxNode* root = scene->GetRootNode();
@@ -107,7 +159,7 @@ std::vector<FbxMesh*> exploreFBXSceneTree(FbxScene* scene)
             if (FbxNodeAttribute::EType::eMesh == attrib->GetAttributeType())
             {
                 FbxMesh* mesh = subTreeRoot->GetMesh();
-                meshes.push_back(mesh);
+                meshNodes.push_back(subTreeRoot);
 
                 if (mesh->IsTriangleMesh())
                 {
@@ -134,12 +186,21 @@ std::vector<FbxMesh*> exploreFBXSceneTree(FbxScene* scene)
             nodeStack.push(subTreeRoot->GetChild(i));
         }
     }
-    return meshes;
+    return meshNodes;
 }
 
-CastleObj::CastleObj(IApp* app): appHost(app)
+CastleObj::CastleObj(IApp* app):
+    appHost(app), CastleTextureParameters({ { "Castle Exterior Texture Bump.dds", "ExteriorBump" },
+                                            { "Castle Exterior Texture.dds", "Exterior" },
+                                            { "Castle Interior Texture Bump.dds", "InteriorBump" },
+                                            { "Castle Interior Texture.dds", "Interior" },
+                                            { "Ground and Fountain Texture Bump.dds", "FountainBump" },
+                                            { "Ground and Fountain Texture.dds", "Fountain" },
+                                            { "Towers_Doors_and_Windows_Texture.dds", "Towers" } }),
+    modelTextureDict(
+        { { "Castle_Interior", 0 }, { "Ground_and_Fountain", 1 }, { "Towers_Doors_and_Windows", 2 }, { "Castle_Exterior", 3 } })
 {
-    std::string fileName = "castle_tri.fbx";
+    std::string fileName = "Meshes/castle.fbx";
 
     FbxManager* lSdkManager = FbxManager::Create();
 
@@ -161,16 +222,26 @@ CastleObj::CastleObj(IApp* app): appHost(app)
     FbxGeometryConverter lGeomConverter(lSdkManager);
     if (lGeomConverter.Triangulate(lScene, true))
     {
-        std::vector<FbxMesh*> meshes = exploreFBXSceneTree(lScene);
-        meshDescription       meshDesc = processFBXMesh(meshes[0]);
-        vertexIndices = meshDesc.indices;
-        vertices = meshDesc.vertices;
+        std::vector<FbxNode*> meshNodes = exploreFBXSceneTree(lScene);
+
+        std::vector<meshDescription> meshesToCombine;
+        for (auto& meshFromFile : meshNodes)
+        {
+            FbxMesh* mesh = meshFromFile->GetMesh();
+            meshDescription meshDesc = processFBXMesh(mesh, modelTextureDict[std::string(meshFromFile->GetName())]);
+            meshesToCombine.push_back(meshDesc);
+        }
+
+        meshDescription combinedMesh = combineMeshes(meshesToCombine);        
+        
+        vertexIndices = combinedMesh.indices;
+        vertices = combinedMesh.vertices;
     }
 
     lImporter->Destroy();
 }
 
-std::vector<textureParams> CastleObj::getTexturesToLoad() { return std::vector<textureParams>(); }
+std::vector<textureParams> CastleObj::getTexturesToLoad() { return CastleTextureParameters; }
 
 const void* CastleObj::getVertexData() { return vertices.data(); }
 
@@ -218,7 +289,16 @@ uint64_t CastleObj::getNumIndexes() { return vertexIndices.size(); }
 
 uint32_t CastleObj::getVertexStride() { return sizeof(vertexFormat); }
 
+
 void CastleObj::update(float deltaTime, ICameraController* cameraController) {
+
+    // setting a time loop
+    static float timeLoop = 0.0f;
+    const float  loopPeriod = 20.0f;
+    timeLoop += deltaTime;
+    if (timeLoop > loopPeriod)
+        timeLoop = 0.0f;
+    float phase = timeLoop / loopPeriod;
    
     // update camera with time
     mat4 viewMat = cameraController->getViewMatrix();
@@ -229,10 +309,24 @@ void CastleObj::update(float deltaTime, ICameraController* cameraController) {
     castleUniform.mProjectView = projMat * viewMat;
 
     // point light parameters
-    castleUniform.mLightPosition = vec3(0, 0, 0);
+
+    float radius = 5000.0f;
+    float angle = 2 * PI * phase;
+    float cx = radius * std::cosf(angle);
+    float cy = radius * std::sinf(angle);
+
+    castleUniform.mLightPosition = vec3(cx, cy, 100.0f);
     castleUniform.mLightColor = vec3(0.9f, 0.9f, 0.7f); // Pale Yellow
 
-    
-    //castleUniform.mToWorldMat[i] = parentMat * rotOrbitY * rotOrbitZ * trans * rotSelf * scale;
-    //castleUniform.mColor[i] = gPlanetInfoData[i].mColor;
+    castleUniform.mColor = vec4(0.32f, 0.f, 0.32f, 1.0f);
+
+    castleUniform.mToWorldMat = mat4::identity();
+
+    castleUniform.modelView = viewMat * castleUniform.mToWorldMat;
+
+    mat3 upperMatrix = castleUniform.modelView.getUpper3x3();
+    mat3 inv_upperMatrix = Vectormath::SSE::inverse(upperMatrix);
+    mat3 t_inv_upperMatrix = Vectormath::SSE::transpose(inv_upperMatrix);
+    castleUniform.mNormalMat = castleUniform.modelView;
+    castleUniform.mNormalMat.setUpper3x3(t_inv_upperMatrix);
 }

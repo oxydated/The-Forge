@@ -38,6 +38,7 @@ private:
     std::vector<Buffer*> skyBoxVertexBuffers;
 
     PipelineWrapper*     castleDrawPipeline = NULL;
+    TextureSet*          castleTextures = NULL;
     UniformSet*          castleUniforms = NULL;
     BufferResource*      castleIndexBuffer = NULL;
     BufferResource*      castleVertexBuffer = NULL;

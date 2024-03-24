@@ -25,14 +25,59 @@
 // Shader for simple shading with a point light
 // for planets in Unit Test 12 - Transformations
 
+#include "resourcesCastle.h.fsl"
+
 STRUCT(VSOutput)
 {
-    DATA(float4, Position, SV_Position);
-    DATA(float4, Color, COLOR);
+	DATA(float4, Position, SV_Position);
+    DATA(float3, lightPosition, none);
+    DATA(float3, Normal, NORMAL);
+	DATA(float4, Color,    COLOR);
+	DATA(float3, TexCoord, TEXCOORD);
+    DATA(float3, WorldPosition, TEXCOORD2);
 };
 
 float4 PS_MAIN( VSOutput In )
 {
     INIT_MAIN;
-    RETURN(In.Color);
+
+    float3 lightPos = Get(lightPosition);
+    float3 Normal = normalize(In.Normal);
+    float lightIntensity = saturate(dot(float3(0.0, 1.0, 0.0), Normal));
+
+    float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
+    float diffuselightIntensity = saturate(dot(LightVectorWorldSpace, In.Normal));
+
+    float ambientLightIntesity = 0.2;
+    float lighIntensity = 0.8;
+
+    int texIndex = int(round(In.TexCoord.z));
+
+    float4 sampledColor = float4(0.0, 0.0, 0.0, 1.0); 
+    float4 sampledBump = float4(0.0, 0.0, 0.0, 1.0); 
+
+    if(texIndex == 0)
+    {
+        sampledColor = SampleTex2D(Interior, Get(uSampler0), In.TexCoord.xy);
+        sampledBump = SampleTex2D(InteriorBump, Get(uSampler0), In.TexCoord.xy);
+    }
+    else if(texIndex == 1)
+    {
+        sampledColor = SampleTex2D(Fountain, Get(uSampler0), In.TexCoord.xy);
+        sampledBump = SampleTex2D(FountainBump, Get(uSampler0), In.TexCoord.xy);
+    }
+    else if(texIndex == 2)
+    {
+        sampledColor = SampleTex2D(Towers, Get(uSampler0), In.TexCoord.xy);
+        sampledBump = SampleTex2D(FountainBump, Get(uSampler0), In.TexCoord.xy);
+    }
+    else if(texIndex == 3)
+    {
+        sampledColor = SampleTex2D(Exterior, Get(uSampler0), In.TexCoord.xy);
+        sampledBump = SampleTex2D(ExteriorBump, Get(uSampler0), In.TexCoord.xy);
+    }
+
+    //float4 sampledColor = SampleTex2D(colorTex, Get(uSampler0), In.TexCoord.xy);
+
+    RETURN((sampledColor + (0.1 * sampledBump)) * saturate(lighIntensity * diffuselightIntensity + ambientLightIntesity));
 }

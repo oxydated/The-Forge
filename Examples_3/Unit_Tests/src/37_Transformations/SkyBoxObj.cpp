@@ -31,7 +31,7 @@ SkyBoxObj::SkyBoxObj(IApp* app):
                               { "Skybox_top3.tex", "TopText" },
                               { "Skybox_bottom4.tex", "BotText" },
                               { "Skybox_front5.tex", "FrontText" },
-                              { "Ground_texture.dds", "BackText" } /*, "Skybox_back6.tex"*/ })
+                              { "Skybox_back6.tex", "BackText" } })
 {
 }
 

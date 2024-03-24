@@ -29,17 +29,6 @@
     <ClCompile Include="..\src\37_Transformations\UserInterfaceWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.frag.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\basic.vert.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\castle.vert.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\crash.vert.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\resources.h.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\resourcesCastle.h.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\ShaderList.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\skybox.frag.fsl" />
-    <FSLShader Include="..\src\01_Transformations\Shaders\FSL\skybox.vert.fsl" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\UnitTestResources\Scripts\TestBorderless.lua" />
     <None Include="..\UnitTestResources\Scripts\TestCenteredWindow.lua" />
     <None Include="..\UnitTestResources\Scripts\TestFullScreen.lua" />
@@ -67,6 +56,17 @@
     <ClInclude Include="..\src\37_Transformations\TextureSet.h" />
     <ClInclude Include="..\src\37_Transformations\UniformSet.h" />
     <ClInclude Include="..\src\37_Transformations\UserInterfaceWrapper.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\basic.frag.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\basic.vert.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\castle.vert.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\crash.vert.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\resources.h.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\resourcesCastle.h.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\ShaderList.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\skybox.frag.fsl" />
+    <FSLShader Include="..\src\37_Transformations\Shaders\FSL\skybox.vert.fsl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{92429F3A-3940-490E-8DF6-0A51496819EA}</ProjectGuid>
@@ -131,7 +131,11 @@
     </Manifest>
     <PostBuildEvent>
       <Command>%(Command) xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Skybox_*.tex" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Castle*.jpg" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Ground*.jpg" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Towers*.jpg" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\circlepad.tex" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Meshes\castle.fbx" "$(OutDir)Meshes\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Fonts\*.ttf" "$(OutDir)Fonts\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Fonts\*.otf" "$(OutDir)Fonts\"
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <map>
 
 #include "../../../../Common_3/Application/Interfaces/IApp.h"
 #include "../../../../Common_3/Application/Interfaces/ICameraController.h"
@@ -11,7 +13,9 @@
 struct UniformBlockCastle
 {
     CameraMatrix mProjectView;
+    mat4         modelView;
     mat4         mToWorldMat;
+    mat4         mNormalMat;
     vec4         mColor;
 
     // Point Light Information
@@ -58,4 +62,6 @@ private:
     std::vector<int>                  vertexIndices;
     std::vector<vertexFormat>         vertices;
     UniformBlockCastle                castleUniform = {};
+    std::vector<textureParams>        CastleTextureParameters;
+    std::map<std::string, uint32_t>   modelTextureDict;
 };

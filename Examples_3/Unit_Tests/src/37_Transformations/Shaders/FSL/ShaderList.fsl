@@ -18,3 +18,7 @@
 #include "skybox.vert.fsl"
 #end
 
+#vert castle.vert
+#include "castle.vert.fsl"
+#end
+

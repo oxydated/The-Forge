@@ -148,14 +148,17 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
         /// create RootSignatures
 
         rootSignature = new Signature({ "uSampler0" }, { { "SkyBoxDrawShader", { "skybox.vert", "skybox.frag" } },
-                                                         { "CastleDrawShader", { "basic.vert", "basic.frag" } } });
+                                                         { "CastleDrawShader", { "castle.vert", "basic.frag" } } });
 
         /// create DescriptorSets
         /// prepare DescriptorSets (that could be a single step)
         
         skyBoxTextures = new TextureSet(rootSignature, skyBox->getTexturesToLoad());
+
         skyUniforms =
             new UniformSet(rootSignature, { { "SkyboxUniformBuffer", "uniformBlock", sizeof(skyBox->getUniformDataSize()) } }, totalFrameBuffers);
+
+        castleTextures = new TextureSet(rootSignature, castle->getTexturesToLoad());
 
         castleUniforms =
             new UniformSet(rootSignature, { { "CastleUniformBuffer", "uniformBlock", castle->getUniformDataSize() } }, totalFrameBuffers);
@@ -184,7 +187,7 @@ bool CastleApp::Load(ReloadDesc* pReloadDesc)
                                                  chain->getRenderTargetByIndex(0), nullptr, CULL_MODE_NONE);
 
         castleDrawPipeline = new PipelineWrapper(rootSignature, "CastleDrawShader", castle->getVertexLayout(),
-                                                 chain->getRenderTargetByIndex(0), depthBuffer, CULL_MODE_FRONT);
+                                                 chain->getRenderTargetByIndex(0), depthBuffer, CULL_MODE_NONE);
     }
 
     // UI stuff
@@ -248,6 +251,12 @@ void CastleApp::Unload(ReloadDesc* pReloadDesc)
         {
             delete skyBoxTextures;
             skyBoxTextures = nullptr;
+        }
+
+        if (castleTextures)
+        {
+            delete castleTextures;
+            castleTextures = nullptr;
         }
 
         // remove Uniforms
@@ -341,7 +350,7 @@ void CastleApp::Draw()
     castleRecObjs.renderTarget = acquiredImageFromSwapchain.renderTarget;
     castleRecObjs.depthBuffer = depthBuffer;
     castleRecObjs.pipeline = castleDrawPipeline;
-    castleRecObjs.textures = nullptr;
+    castleRecObjs.textures = castleTextures;
     castleRecObjs.uniforms = castleUniforms;
     castleRecObjs.indexBuffer = &localCastleIndexBuffer;
     castleRecObjs.vertexBuffer = castleVertexBuffers.data();
@@ -412,6 +421,8 @@ void CastleApp::commandsToRecord(void* data)
     castleRecObjs.cmd->setViewPort(0, 0, (float)width, (float)height, 0, 1);
 
     castleRecObjs.cmd->BindPipeline(castleRecObjs.pipeline);
+
+    castleRecObjs.cmd->BindTextureSet(castleRecObjs.textures, 0);
 
     castleRecObjs.cmd->BindUniformSet(castleRecObjs.uniforms, skyRecObjs.frameIndex * 2 + 0);
 

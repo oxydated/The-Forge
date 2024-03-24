@@ -50,13 +50,10 @@ void UserInterfaceWrapper::loadUI(ReloadDesc* pReloadDesc, IApp* app, RenderTarg
     fontLoad.mWidth = app->mSettings.mWidth;
     fontLoad.mLoadType = pReloadDesc->mType;
     loadFontSystem(&fontLoad);
-
-    //initScreenshotInterface(RendererWrapper::getRenderer(), queueWrapper->getQueue());
 }
 
 void UserInterfaceWrapper::ExitUIAlternative()
 {
-    //exitScreenshotInterface();
     removeCamera();
     exitUserInterface();
     exitFontSystem();
