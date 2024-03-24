@@ -135,6 +135,7 @@
       <Command>%(Command) xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Skybox_*.tex" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Castle*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Ground*.dds" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Towers*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\circlepad.tex" "$(OutDir)Textures\"
 
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Meshes\castle.fbx" "$(OutDir)Meshes\"
@@ -198,6 +199,7 @@ xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\DLLs\$(Configuration)\libfbxsd
       <Command>%(Command) xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Skybox_*.tex" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Castle*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Ground*.dds" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Towers*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\circlepad.tex" "$(OutDir)Textures\"
 
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Meshes\castle.fbx" "$(OutDir)Meshes\"
@@ -213,8 +215,7 @@ xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Scripts\*.lua" "$(OutDir)Scrip
 xcopy "$(TheForgeRoot)Common_3\OS\Windows\pc_gpu.data" "$(OutDir)GPUCfg\gpu.data*" /Y /D
 xcopy "$(TheForgeRoot)Examples_3\Unit_Tests\src\$(ProjectName)\GPUCfg\gpu.cfg" "$(OutDir)GPUCfg\gpu.cfg*" /Y /D
 
-xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\DLLs\$(Configuration)\libfbxsdk.dll" "$(OutDir)"
-</Command>
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\DLLs\$(Configuration)\libfbxsdk.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>%(Command) 

@@ -68,8 +68,8 @@ float4 PS_MAIN( VSOutput In )
     }
     else if(texIndex == 2)
     {
-        sampledColor = SampleTex2D(Fountain, Get(uSampler0), In.TexCoord.xy);
-        sampledBump = SampleTex2D(FountainBump, Get(uSampler0), In.TexCoord.xy);
+        sampledColor = SampleTex2D(Towers, Get(uSampler0), In.TexCoord.xy);
+        sampledBump = float4(0.0, 0.0, 0.0, 1.0);
     }
     else if(texIndex == 3)
     {

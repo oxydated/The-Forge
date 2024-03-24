@@ -195,7 +195,8 @@ CastleObj::CastleObj(IApp* app):
                                             { "Castle Interior Texture Bump.dds", "InteriorBump" },
                                             { "Castle Interior Texture.dds", "Interior" },
                                             { "Ground and Fountain Texture Bump.dds", "FountainBump" },
-                                            { "Ground and Fountain Texture.dds", "Fountain" } }),
+                                            { "Ground and Fountain Texture.dds", "Fountain" },
+                                            { "Towers Doors and Windows Texture.dds", "Towers" } }),
     modelTextureDict(
         { { "Castle_Interior", 0 }, { "Ground_and_Fountain", 1 }, { "Towers_Doors_and_Windows", 2 }, { "Castle_Exterior", 3 } })
 {
