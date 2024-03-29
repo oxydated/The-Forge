@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Castle\BinormalSolver.cpp" />
     <ClCompile Include="..\src\Castle\BufferResource.cpp" />
     <ClCompile Include="..\src\Castle\CastleApp.cpp" />
     <ClCompile Include="..\src\Castle\CastleObj.cpp" />
@@ -35,6 +36,7 @@
     <None Include="..\UnitTestResources\Scripts\TestNonCenteredWindow.lua" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Castle\BinormalSolver.h" />
     <ClInclude Include="..\src\Castle\BufferResource.h" />
     <ClInclude Include="..\src\Castle\CastleApp.h" />
     <ClInclude Include="..\src\Castle\CastleObj.h" />

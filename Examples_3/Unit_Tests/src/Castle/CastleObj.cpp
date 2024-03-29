@@ -1,10 +1,13 @@
 #include "CastleObj.h"
-#include <fbxsdk.h>
-#include <exception>
-#include <stack>
+
 #include <array>
 #include <cmath>
+#include <exception>
+#include <fbxsdk.h>
 #include <iterator>
+#include <stack>
+
+#include "BinormalSolver.h"
 
 struct meshDescription
 {
@@ -68,6 +71,8 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
 
         for (int i = 0; i < polyCount; i++)
         {
+            std::array<vertexFormat, 3> triangleVertices;
+
             int numVerticesInPoly = mesh->GetPolygonSize(i);
             for (int j = 0; j < numVerticesInPoly; j++)
             {
@@ -94,7 +99,10 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
 
                 rawVertices.push_back(newVertex.vertex);
                 rawIndicesVector.push_back(indexCounter++);
+
+                triangleVertices[j] = newVertex.vertex;
             }
+            GenerateBinormalsForTriangle(triangleVertices);
         }
     }
     
