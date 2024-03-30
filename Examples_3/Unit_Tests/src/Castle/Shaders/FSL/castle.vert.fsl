@@ -8,7 +8,9 @@ STRUCT(VSInput)
 {
 	DATA(float4, Position, POSITION);
 	DATA(float3, Normal, NORMAL);
-    DATA(float3, TexCoord, TEXCOORD);
+    DATA(float3, TexCoord, TEXCOORD0);
+    DATA(float3, binormal, TEXCOORD1);
+    DATA(float3, tangent, TEXCOORD2);
 };
 
 STRUCT(VSOutput)
@@ -17,8 +19,10 @@ STRUCT(VSOutput)
     DATA(float3, lightPosition, none);
     DATA(float3, Normal, NORMAL);
 	DATA(float4, Color,    COLOR);
-	DATA(float3, TexCoord, TEXCOORD);
-    DATA(float3, WorldPosition, TEXCOORD2);
+	DATA(float3, TexCoord, TEXCOORD0);
+    DATA(float3, WorldPosition, TEXCOORD1);
+    DATA(float3, binormal, TEXCOORD2);
+    DATA(float3, tangent, TEXCOORD3);
 };
 
 VSOutput VS_MAIN( VSInput In, SV_InstanceID(uint) InstanceID )
@@ -34,12 +38,21 @@ VSOutput VS_MAIN( VSInput In, SV_InstanceID(uint) InstanceID )
 
     Out.WorldPosition = In.Position.xyz;
     Out.lightPosition = Get(lightPosition);
-    Out.Normal = In.Normal;
 
     ///
     
     Out.Position = mul(Get(mvp), In.Position);
     float4 normal = normalize(mul(Get(normalMat), float4(In.Normal, 1.0f)));
+    float4 binormal = normalize(mul(Get(normalMat), float4(In.binormal, 1.0f)));
+    float4 tangent = normalize(mul(Get(normalMat), float4(In.tangent, 1.0f)));
+
+    //Out.Normal = normal.xyz;
+    //Out.binormal = binormal.xyz;
+    //Out.tangent = tangent.xyz;
+
+    Out.Normal = In.Normal;
+    Out.binormal = In.binormal;
+    Out.tangent = In.tangent;
 
     float3 InColor = Get(color).xyz;
 

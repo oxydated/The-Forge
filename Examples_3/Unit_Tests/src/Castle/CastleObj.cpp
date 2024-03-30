@@ -12,7 +12,7 @@
 struct meshDescription
 {
     std::vector<int> indices;
-    std::vector<vertexFormat> vertices;
+    std::vector<vertexWithBinormalAndTangent> vertices;
 };
 
 struct vertexDescription
@@ -32,7 +32,7 @@ struct vertexFromMesh   // for mesh building. It considers repeating instances f
 
 meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
 {
-    std::vector<vertexFormat> rawVertices;
+    std::vector<vertexWithBinormalAndTangent> rawVertices;
     std::vector<int>          rawIndicesVector;
 
     FbxStringList             UVSetNames;
@@ -92,17 +92,21 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
                 bool       unmapped = false;
                 if (hasUV)
                     mesh->GetPolygonVertexUV(i, j, UVSetName, polUV, unmapped);
-                newVertex.vertex.UVW = { (float)polUV[0], 1.0f - (float)polUV[1], (float)textureIndex };
+                newVertex.vertex.UVW = { (float)polUV[0], (float)polUV[1], (float)textureIndex };
 
                 FbxVector4 polPoint = meshPoints[newVertex.indexInMesh];
                 newVertex.vertex.position = { (float)polPoint[0], (float)polPoint[1], (float)polPoint[2], 1.0f };
 
-                rawVertices.push_back(newVertex.vertex);
+                //rawVertices.push_back(newVertex.vertex);
                 rawIndicesVector.push_back(indexCounter++);
 
                 triangleVertices[j] = newVertex.vertex;
             }
-            GenerateBinormalsForTriangle(triangleVertices);
+            std::array<vertexWithBinormalAndTangent, 3>  newTriangle = GenerateBinormalsForTriangle(triangleVertices);
+            for (auto& triVertex : newTriangle)
+            {
+                rawVertices.push_back(triVertex);
+            }
         }
     }
     
@@ -200,8 +204,10 @@ std::vector<FbxNode*> exploreFBXSceneTree(FbxScene* scene)
 CastleObj::CastleObj(IApp* app):
     appHost(app), CastleTextureParameters({ { "Castle Exterior Texture Bump.dds", "ExteriorBump" },
                                             { "Castle Exterior Texture.dds", "Exterior" },
-                                            { "Castle Interior Texture Bump.dds", "InteriorBump" },
-                                            { "Castle Interior Texture.dds", "Interior" },
+                                            /*{ "Castle Interior Texture NormalMap.dds", "InteriorBump" },
+                                            { "Castle Interior Texture.dds", "Interior" },*/
+                                            { "Castle Interior Texture_new_normalmap.dds", "InteriorBump" },
+                                            { "Castle Interior Texture_new.dds", "Interior" },
                                             { "Ground and Fountain Texture Bump.dds", "FountainBump" },
                                             { "Ground and Fountain Texture.dds", "Fountain" },
                                             { "Towers Doors and Windows Texture.dds", "Towers" } }),
@@ -253,7 +259,7 @@ std::vector<textureParams> CastleObj::getTexturesToLoad() { return CastleTexture
 
 const void* CastleObj::getVertexData() { return vertices.data(); }
 
-uint64_t CastleObj::getVertexDataSize() { return vertices.size() * sizeof(vertexFormat); }
+uint64_t CastleObj::getVertexDataSize() { return vertices.size() * sizeof(vertexWithBinormalAndTangent); }
 
 const void* CastleObj::getUniformData() { return (void*)&castleUniform; }
 
@@ -264,7 +270,7 @@ VertexLayout CastleObj::getVertexLayout()
     VertexLayout vertexLayout = {};
     vertexLayout = {};
     vertexLayout.mBindingCount = 1;
-    vertexLayout.mAttribCount = 3;
+    vertexLayout.mAttribCount = 5;
 
     vertexLayout.mBindings[0].mStride = sizeof(vertexFormat);
 
@@ -286,6 +292,18 @@ VertexLayout CastleObj::getVertexLayout()
     vertexLayout.mAttribs[2].mLocation = 2;
     vertexLayout.mAttribs[2].mOffset = vertexLayout.mAttribs[1].mOffset + sizeof(float3);
 
+    vertexLayout.mAttribs[3].mSemantic = SEMANTIC_TEXCOORD1;
+    vertexLayout.mAttribs[3].mFormat = TinyImageFormat_R32G32B32_SFLOAT;
+    vertexLayout.mAttribs[3].mBinding = 0;
+    vertexLayout.mAttribs[3].mLocation = 3;
+    vertexLayout.mAttribs[3].mOffset = vertexLayout.mAttribs[2].mOffset + sizeof(float3);
+
+    vertexLayout.mAttribs[4].mSemantic = SEMANTIC_TEXCOORD2;
+    vertexLayout.mAttribs[4].mFormat = TinyImageFormat_R32G32B32_SFLOAT;
+    vertexLayout.mAttribs[4].mBinding = 0;
+    vertexLayout.mAttribs[4].mLocation = 4;
+    vertexLayout.mAttribs[4].mOffset = vertexLayout.mAttribs[3].mOffset + sizeof(float3);
+
     return vertexLayout;
 }
 
@@ -295,7 +313,7 @@ uint64_t CastleObj::getIndexDataSize() { return vertexIndices.size() * sizeof(in
 
 uint64_t CastleObj::getNumIndexes() { return vertexIndices.size(); }
 
-uint32_t CastleObj::getVertexStride() { return sizeof(vertexFormat); }
+uint32_t CastleObj::getVertexStride() { return sizeof(vertexWithBinormalAndTangent); }
 
 
 void CastleObj::update(float deltaTime, ICameraController* cameraController) {
@@ -323,7 +341,7 @@ void CastleObj::update(float deltaTime, ICameraController* cameraController) {
     float cx = radius * std::cosf(angle);
     float cy = radius * std::sinf(angle);
 
-    castleUniform.mLightPosition = vec3(cx, cy, 100.0f);
+    castleUniform.mLightPosition = vec3(cx, 0.0f, cy);
     castleUniform.mLightColor = vec3(0.9f, 0.9f, 0.7f); // Pale Yellow
 
     castleUniform.mColor = vec4(0.32f, 0.f, 0.32f, 1.0f);
@@ -333,8 +351,11 @@ void CastleObj::update(float deltaTime, ICameraController* cameraController) {
     castleUniform.modelView = viewMat * castleUniform.mToWorldMat;
 
     mat3 upperMatrix = castleUniform.modelView.getUpper3x3();
+
     mat3 inv_upperMatrix = Vectormath::SSE::inverse(upperMatrix);
     mat3 t_inv_upperMatrix = Vectormath::SSE::transpose(inv_upperMatrix);
     castleUniform.mNormalMat = castleUniform.modelView;
-    castleUniform.mNormalMat.setUpper3x3(t_inv_upperMatrix);
+
+    castleUniform.mNormalMat = mat4::identity();
+    castleUniform.mNormalMat.setUpper3x3(upperMatrix);
 }

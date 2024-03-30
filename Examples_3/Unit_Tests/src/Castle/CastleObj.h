@@ -9,6 +9,7 @@
 
 #include "ISceneObject.h"
 #include "projections.h"
+#include "BinormalSolver.h"
 
 struct UniformBlockCastle
 {
@@ -60,7 +61,7 @@ public:
 private:
     IApp*                             appHost = nullptr;
     std::vector<int>                  vertexIndices;
-    std::vector<vertexFormat>         vertices;
+    std::vector<vertexWithBinormalAndTangent> vertices;
     UniformBlockCastle                castleUniform = {};
     std::vector<textureParams>        CastleTextureParameters;
     std::map<std::string, uint32_t>   modelTextureDict;

@@ -33,8 +33,10 @@ STRUCT(VSOutput)
     DATA(float3, lightPosition, none);
     DATA(float3, Normal, NORMAL);
 	DATA(float4, Color,    COLOR);
-	DATA(float3, TexCoord, TEXCOORD);
-    DATA(float3, WorldPosition, TEXCOORD2);
+	DATA(float3, TexCoord, TEXCOORD0);
+    DATA(float3, WorldPosition, TEXCOORD1);
+    DATA(float3, binormal, TEXCOORD2);
+    DATA(float3, tangent, TEXCOORD3);
 };
 
 float4 PS_MAIN( VSOutput In )
@@ -42,19 +44,19 @@ float4 PS_MAIN( VSOutput In )
     INIT_MAIN;
 
     float3 lightPos = Get(lightPosition);
-    float3 Normal = normalize(In.Normal);
-    float lightIntensity = saturate(dot(float3(0.0, 1.0, 0.0), Normal));
 
-    float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
-    float diffuselightIntensity = saturate(dot(LightVectorWorldSpace, In.Normal));
+    //float3 Normal = normalize(In.Normal);
+    //float3 binormal = normalize(In.binormal);
+    //float3 tangent = normalize(In.tangent);
 
-    float ambientLightIntesity = 0.2;
-    float lighIntensity = 0.8;
-
-    int texIndex = int(round(In.TexCoord.z));
+    float3 Normal = In.Normal;
+    float3 binormal = normalize(cross(In.Normal, In.tangent));
+    float3 tangent = normalize(cross(In.Normal, binormal));
 
     float4 sampledColor = float4(0.0, 0.0, 0.0, 1.0); 
     float4 sampledBump = float4(0.0, 0.0, 0.0, 1.0); 
+    
+    int texIndex = int(round(In.TexCoord.z));
 
     if(texIndex == 0)
     {
@@ -77,7 +79,19 @@ float4 PS_MAIN( VSOutput In )
         sampledBump = SampleTex2D(ExteriorBump, Get(uSampler0), In.TexCoord.xy);
     }
 
+    float3 bumpedNormal = normalize((2.0 * sampledBump.x - 1.0) *  binormal + (2.0 * sampledBump.y - 1.0) * tangent  - sampledBump.z * Normal);
+
+    float lightIntensity = saturate(dot(float3(0.0, 1.0, 0.0), bumpedNormal));
+
+    float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
+    float diffuselightIntensity = saturate(dot(LightVectorWorldSpace, bumpedNormal));
+
+    float ambientLightIntesity = 0.2;
+    float lighIntensity = 0.8;
+
     //float4 sampledColor = SampleTex2D(colorTex, Get(uSampler0), In.TexCoord.xy);
 
-    RETURN((sampledColor + (0.1 * sampledBump)) * saturate(lighIntensity * diffuselightIntensity + ambientLightIntesity));
+    RETURN((sampledColor) * saturate(lighIntensity * diffuselightIntensity + ambientLightIntesity));
+    //RETURN((sampledColor*0.01) + (float4(bumpedNormal, 1.0) * 0.99 ));
+    //RETURN((sampledColor*0.01) + (sampledBump * 0.99 ));
 }
