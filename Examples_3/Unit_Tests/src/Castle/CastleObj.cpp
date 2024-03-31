@@ -63,6 +63,7 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
     
     if (UVMappingMode != FbxGeometryElement::eByControlPoint || normalMappingMode != FbxGeometryElement::eByControlPoint)
     {
+        std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex;
         int polyCount = mesh->GetPolygonCount();
 
         FbxVector4* meshPoints = mesh->GetControlPoints();
@@ -101,6 +102,21 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
                 rawIndicesVector.push_back(indexCounter++);
 
                 triangleVertices[j] = newVertex.vertex;
+
+                // to calculate tangent, we need adjacency information (one tangent for all triangles sharing a vertex)
+
+                int uvIndex = mesh->GetTextureUVIndex(i, j);
+                int vertexIndex = mesh->GetPolygonVertex(i, j);
+
+                std::array<int, 2> keyVertexAndUV = { uvIndex, vertexIndex };
+
+                auto found = trianglesSharingVertex.find(keyVertexAndUV);
+                if (found == trianglesSharingVertex.end())
+                {
+                    trianglesSharingVertex[keyVertexAndUV] = std::vector<int>();                
+                }
+                trianglesSharingVertex[keyVertexAndUV].push_back(i);
+
             }
             std::array<vertexWithBinormalAndTangent, 3>  newTriangle = GenerateBinormalsForTriangle(triangleVertices);
             for (auto& triVertex : newTriangle)
