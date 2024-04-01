@@ -98,3 +98,49 @@ std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::ar
 
     return { vertex0, vertex1, vertex2 };
 }
+
+void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex)
+{
+    FbxStringList UVSetNames;
+    mesh->GetUVSetNames(UVSetNames);
+
+    const char* UVSetName = nullptr;
+    UVSetName = UVSetNames[0];
+
+    for (auto& vertexAndTriangles : trianglesSharingVertex)
+    {
+        int vertexIndex = vertexAndTriangles.first[0];
+        int uvIndex = vertexAndTriangles.first[1];
+
+        std::vector<int>& triIndices = vertexAndTriangles.second;
+
+        for (int triIndex : triIndices)
+        {
+            int numVerticesInPoly = mesh->GetPolygonSize(triIndex);
+            int indexInPoly = 0;
+
+            for (int j = 0; j < numVerticesInPoly; j++)
+            {
+                if (vertexIndex == mesh->GetPolygonVertex(triIndex, j))
+                {
+                    indexInPoly = j;
+                }
+            }
+
+            int j0 = indexInPoly;
+            int j1 = (indexInPoly + 1) % numVerticesInPoly;
+            int j2 = (indexInPoly + 2) % numVerticesInPoly;
+
+            bool       unmapped = false;
+
+            FbxVector2 UV0 = FbxVector2();
+            mesh->GetPolygonVertexUV(triIndex, j0, UVSetName, UV0, unmapped);
+
+            FbxVector2 UV1 = FbxVector2();
+            mesh->GetPolygonVertexUV(triIndex, j1, UVSetName, UV1, unmapped);
+
+            FbxVector2 UV2 = FbxVector2();
+            mesh->GetPolygonVertexUV(triIndex, j2, UVSetName, UV2, unmapped);
+        }    
+    }
+}

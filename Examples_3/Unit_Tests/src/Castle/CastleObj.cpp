@@ -124,6 +124,8 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
                 rawVertices.push_back(triVertex);
             }
         }
+
+        GenerateBinormalForSharedVertex(mesh, trianglesSharingVertex);
     }
     
     /// No need for a indexBuffer for this model as the vertices in the vertexBuffer map directly to the mesh's triangles vertices (one to one relationship)
