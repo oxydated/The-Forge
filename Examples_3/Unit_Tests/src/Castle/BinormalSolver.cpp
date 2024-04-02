@@ -6,6 +6,52 @@
 
 using namespace Vectormath::SSE;
 
+std::array<Vector3, 2> GenerateBinormalForVertice(Vector3 normal, Vector4 p0, Vector2 UV0, Vector4 p1, Vector2 UV1, Vector4 p2, Vector2 UV2)
+{
+    float p0x = p0.getX();
+    float p0y = p0.getY();
+    float p0z = p0.getZ();
+
+    float p1x = p1.getX();
+    float p1y = p1.getY();
+    float p1z = p1.getZ();
+
+    float p2x = p2.getX();
+    float p2y = p2.getY();
+    float p2z = p2.getZ();
+
+    float u0 = UV0.getX();
+    float v0 = UV0.getY();
+
+    float u1 = UV1.getX();
+    float v1 = UV1.getY();
+
+    float u2 = UV2.getX();
+    float v2 = UV2.getY();
+
+    float px, py, pz;
+    float x, y;
+
+    // Binormal Vertex 0
+
+    x = (v0 - v2) / (u1 * v0 - u2 * v0 - u0 * v1 + u2 * v1 + u0 * v2 - u1 * v2);
+    y = (v0 - v1) / (u2 * (v0 - v1) + u0 * (v1 - v2) + u1 * (-v0 + v2));
+
+    px = p0x + (-p0x + p1x) * x + (-p0x + p2x) * y;
+    py = p0y + (-p0y + p1y) * x + (-p0y + p2y) * y;
+    pz = p0z + (-p0z + p1z) * x + (-p0z + p2z) * y;
+
+    // float3 V0 = { px - p0x, py - p0y, pz - p0z };
+    // float3 tang0 =
+
+    Vector3 V0(px - p0x, py - p0y, pz - p0z);
+    Vector3 N0(normal.getX(), normal.getY(), normal.getZ());
+    Vector3 T0 = normalize(cross(N0, V0));
+    Vector3 B0 = normalize(cross(N0, T0));
+
+    return { T0, B0 };
+}
+
 std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::array<vertexFormat, 3> vertices)
 {
     float p0x = vertices[0].position.getX();
@@ -195,7 +241,31 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
             else
             {
                 coordVertex++;
-            }        
+            }
         }
+        Vector3 v0Normal = { (float)Normal0[0], (float)Normal0[1], (float)Normal0[2] };
+
+        Vector4 v0Pos = { (float)vert0[0], (float)vert0[1], (float)vert0[2], (float)vert0[3] };
+        Vector2 v0UV = { (float)UV0[0], (float)UV0[1] };
+
+        Vector4 v1Pos = { (float)triangleVertices[coordVertex % numCoords].second[0],
+                          (float)triangleVertices[coordVertex % numCoords].second[1],
+                          (float)triangleVertices[coordVertex % numCoords].second[2],
+                          (float)triangleVertices[coordVertex % numCoords].second[3] };
+        Vector2 v1UV = { (float)UV0[0] + (float)triangleVertices[coordVertex % numCoords].first[0],
+                         (float)UV0[1] + (float)triangleVertices[coordVertex % numCoords].first[1] };
+
+        Vector4 v2Pos = { (float)triangleVertices[(coordVertex + 1) % numCoords].second[0],
+                          (float)triangleVertices[(coordVertex + 1) % numCoords].second[1],
+                          (float)triangleVertices[(coordVertex + 1) % numCoords].second[2],
+                          (float)triangleVertices[(coordVertex + 1) % numCoords].second[3] };
+        Vector2 v2UV = { (float)UV0[0] + (float)triangleVertices[(coordVertex + 1) % numCoords].first[0],
+                         (float)UV0[1] + (float)triangleVertices[(coordVertex + 1) % numCoords].first[1] };
+
+
+        auto tangentAndBinormal = GenerateBinormalForVertice(v0Normal, v0Pos, v0UV, v1Pos, v1UV, v2Pos, v2UV);
+
+        auto Tangent = tangentAndBinormal[0];
+        auto Binormal = tangentAndBinormal[1];
     }
 }
