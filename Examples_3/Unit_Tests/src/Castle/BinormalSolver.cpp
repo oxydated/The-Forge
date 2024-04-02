@@ -1,5 +1,7 @@
 #include "BinormalSolver.h"
 
+#include <algorithm>
+
 #include "CastleObj.h"
 
 using namespace Vectormath::SSE;
@@ -114,6 +116,30 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
 
         std::vector<int>& triIndices = vertexAndTriangles.second;
 
+        FbxVector2 UV0 = FbxVector2();
+        FbxVector4 vert0 = FbxVector4();
+        FbxVector4 Normal0 = FbxVector4();
+
+        std::vector<std::pair<FbxVector2, FbxVector4>> triangleVertices;
+
+        auto compareVertices = [](std::pair<FbxVector2, FbxVector4> item0, std::pair<FbxVector2, FbxVector4> item1)
+        {
+            auto angleFromUV = [](float u, float v)
+            {
+                float sinUV = v / std::sqrt(v * v + u * u);
+                float cosUV = u / std::sqrt(v * v + u * u);
+                float angle = std::atan2(v, u);
+
+                return angle;
+            };
+
+            float u0 = (float)item0.first[0];
+            float v0 = (float)item0.first[1];
+            float u1 = (float)item1.first[0];
+            float v1 = (float)item1.first[1];
+            return angleFromUV(u0, v0) < angleFromUV(u1, v1);
+        };
+
         for (int triIndex : triIndices)
         {
             int numVerticesInPoly = mesh->GetPolygonSize(triIndex);
@@ -131,16 +157,45 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
             int j1 = (indexInPoly + 1) % numVerticesInPoly;
             int j2 = (indexInPoly + 2) % numVerticesInPoly;
 
-            bool       unmapped = false;
-
-            FbxVector2 UV0 = FbxVector2();
+            bool unmapped = false;
             mesh->GetPolygonVertexUV(triIndex, j0, UVSetName, UV0, unmapped);
+            int        j0Index = mesh->GetPolygonVertex(triIndex, j0);
+            vert0 = mesh->GetControlPointAt(j0Index);
+
+            mesh->GetPolygonVertexNormal(triIndex, j0, Normal0);
 
             FbxVector2 UV1 = FbxVector2();
             mesh->GetPolygonVertexUV(triIndex, j1, UVSetName, UV1, unmapped);
+            int        j1Index = mesh->GetPolygonVertex(triIndex, j1);
+            FbxVector4 vert1 = mesh->GetControlPointAt(j1Index);
+
+            triangleVertices.push_back(std::make_pair(UV1 - UV0, vert1));
 
             FbxVector2 UV2 = FbxVector2();
             mesh->GetPolygonVertexUV(triIndex, j2, UVSetName, UV2, unmapped);
-        }    
+            int        j2Index = mesh->GetPolygonVertex(triIndex, j2);
+            FbxVector4 vert2 = mesh->GetControlPointAt(j2Index);
+
+            triangleVertices.push_back(std::make_pair(UV2 - UV0, vert2));            
+        }
+
+        std::sort(triangleVertices.begin(), triangleVertices.end(), compareVertices);
+
+        int coordVertex = 0;
+        bool found = false;
+        int  numCoords = (int)triangleVertices.size();
+        auto UVTangent = std::make_pair(FbxVector2(1.0f, 0.0f), FbxVector4());
+        while (!found)
+        {
+            if (compareVertices(triangleVertices[coordVertex % numCoords], UVTangent) &&
+                compareVertices(UVTangent, triangleVertices[(coordVertex + 1) % numCoords]))
+            {
+                found = true;
+            }
+            else
+            {
+                coordVertex++;
+            }        
+        }
     }
 }
