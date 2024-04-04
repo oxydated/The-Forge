@@ -87,8 +87,8 @@ std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::ar
     py = p0y + (-p0y + p1y) * x + (-p0y + p2y) * y;
     pz = p0z + (-p0z + p1z) * x + (-p0z + p2z) * y;
 
-    //float3 V0 = { px - p0x, py - p0y, pz - p0z };
-    //float3 tang0 = 
+    // float3 V0 = { px - p0x, py - p0y, pz - p0z };
+    // float3 tang0 =
 
     Vector3 V0(px - p0x, py - p0y, pz - p0z);
     Vector3 N0(vertices[0].normal.getX(), vertices[0].normal.getY(), vertices[0].normal.getZ());
@@ -126,7 +126,7 @@ std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::ar
     // Binormal Vertex 2
 
     x = (v0 - v2) / (u1 * v0 - u2 * v0 - u0 * v1 + u2 * v1 + u0 * v2 - u1 * v2);
-    y = 1 + (v0 - v1)/(u2*(v0 - v1) + u0*(v1 - v2) + u1*(-v0 + v2));
+    y = 1 + (v0 - v1) / (u2 * (v0 - v1) + u0 * (v1 - v2) + u1 * (-v0 + v2));
 
     px = p0x + (-p0x + p1x) * x + (-p0x + p2x) * y;
     py = p0y + (-p0y + p1y) * x + (-p0y + p2y) * y;
@@ -147,7 +147,9 @@ std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::ar
     return { vertex0, vertex1, vertex2 };
 }
 
-void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex)
+meshDescription GenerateBinormalForSharedVertex(FbxMesh*                                                      mesh,
+                                                std::map<std::array<int, 2>, std::vector<std::array<int, 2>>> trianglesSharingVertex,
+                                                int                                                           texIndex)
 {
     FbxStringList UVSetNames;
     mesh->GetUVSetNames(UVSetNames);
@@ -155,12 +157,19 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
     const char* UVSetName = nullptr;
     UVSetName = UVSetNames[0];
 
+    int              polyCount = mesh->GetPolygonCount();
+    std::vector<int> vertexIndicesForTriangles(polyCount * 3);
+
+    std::vector<vertexWithBinormalAndTangent> rawVertices;
+
+    int indexNextNewVertex = 0;
+
     for (auto& vertexAndTriangles : trianglesSharingVertex)
     {
         int vertexIndex = vertexAndTriangles.first[0];
         int uvIndex = vertexAndTriangles.first[1];
 
-        std::vector<int>& triIndices = vertexAndTriangles.second;
+        std::vector<std::array<int, 2>>& triIndices = vertexAndTriangles.second;
 
         FbxVector2 UV0 = FbxVector2();
         FbxVector4 vert0 = FbxVector4();
@@ -186,18 +195,15 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
             return angleFromUV(u0, v0) < angleFromUV(u1, v1);
         };
 
-        for (int triIndex : triIndices)
+        int faceIndex = 0;
+        int vertexIndexInFace = 0;
+
+        for (auto triIndexAndPosition : triIndices)
         {
+            int triIndex = triIndexAndPosition[0];
+            int j = triIndexAndPosition[1];
             int numVerticesInPoly = mesh->GetPolygonSize(triIndex);
             int indexInPoly = 0;
-
-            for (int j = 0; j < numVerticesInPoly; j++)
-            {
-                if (vertexIndex == mesh->GetPolygonVertex(triIndex, j))
-                {
-                    indexInPoly = j;
-                }
-            }
 
             int j0 = indexInPoly;
             int j1 = (indexInPoly + 1) % numVerticesInPoly;
@@ -205,7 +211,7 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
 
             bool unmapped = false;
             mesh->GetPolygonVertexUV(triIndex, j0, UVSetName, UV0, unmapped);
-            int        j0Index = mesh->GetPolygonVertex(triIndex, j0);
+            int j0Index = mesh->GetPolygonVertex(triIndex, j0);
             vert0 = mesh->GetControlPointAt(j0Index);
 
             mesh->GetPolygonVertexNormal(triIndex, j0, Normal0);
@@ -222,16 +228,16 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
             int        j2Index = mesh->GetPolygonVertex(triIndex, j2);
             FbxVector4 vert2 = mesh->GetControlPointAt(j2Index);
 
-            triangleVertices.push_back(std::make_pair(UV2 - UV0, vert2));            
+            triangleVertices.push_back(std::make_pair(UV2 - UV0, vert2));
         }
 
         std::sort(triangleVertices.begin(), triangleVertices.end(), compareVertices);
 
-        int coordVertex = 0;
+        int  coordVertex = 0;
         bool found = false;
         int  numCoords = (int)triangleVertices.size();
         auto UVTangent = std::make_pair(FbxVector2(1.0f, 0.0f), FbxVector4());
-        while (!found)
+        while ((!found) && (coordVertex < numCoords))
         {
             if (compareVertices(triangleVertices[coordVertex % numCoords], UVTangent) &&
                 compareVertices(UVTangent, triangleVertices[(coordVertex + 1) % numCoords]))
@@ -262,10 +268,24 @@ void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>,
         Vector2 v2UV = { (float)UV0[0] + (float)triangleVertices[(coordVertex + 1) % numCoords].first[0],
                          (float)UV0[1] + (float)triangleVertices[(coordVertex + 1) % numCoords].first[1] };
 
-
         auto tangentAndBinormal = GenerateBinormalForVertice(v0Normal, v0Pos, v0UV, v1Pos, v1UV, v2Pos, v2UV);
 
         auto Tangent = tangentAndBinormal[0];
         auto Binormal = tangentAndBinormal[1];
+
+        vertexWithBinormalAndTangent newVertex = {};
+        newVertex.position = { v0Pos.getX(), v0Pos.getY(), v0Pos.getZ(), v0Pos.getW() };
+        newVertex.UVW = { v0UV.getX(), v0UV.getY(), (float)texIndex };
+        newVertex.normal = { v0Normal.getX(), v0Normal.getY(), v0Normal.getZ() };
+        newVertex.binormal = { Binormal.getX(), Binormal.getY(), Binormal.getZ() };
+        newVertex.tangent = { Tangent.getX(), Tangent.getY(), Tangent.getZ() };
+
+        // setting vertex index in triangle (indexBuffer)
+
+        indexNextNewVertex++;
+        rawVertices.push_back(newVertex);
     }
+    rawVertices.shrink_to_fit();
+
+    return { vertexIndicesForTriangles, rawVertices };
 }

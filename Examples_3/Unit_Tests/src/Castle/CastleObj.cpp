@@ -8,30 +8,27 @@
 #include <stack>
 
 #include "BinormalSolver.h"
+#include "MeshExtractor.h"
 
-struct meshDescription
-{
-    std::vector<int> indices;
-    std::vector<vertexWithBinormalAndTangent> vertices;
-};
-
-struct vertexDescription
-{
-    int                  vertexIndex;
-    std::array<float, 4> vertexCoord;
-};
-
-struct vertexFromMesh   // for mesh building. It considers repeating instances from the same vertex.
-{
-    int indexInMesh;
-    int indexInPoly;
-    int polygonIndex;
-
-    vertexFormat vertex;
-};
+//struct vertexDescription
+//{
+//    int                  vertexIndex;
+//    std::array<float, 4> vertexCoord;
+//};
+//
+//struct vertexFromMesh   // for mesh building. It considers repeating instances from the same vertex.
+//{
+//    int indexInMesh;
+//    int indexInPoly;
+//    int polygonIndex;
+//
+//    vertexFormat vertex;
+//};
 
 meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
 {
+    return extractFBXMesh(mesh, textureIndex);
+
     std::vector<vertexWithBinormalAndTangent> rawVertices;
     std::vector<int>          rawIndicesVector;
 
@@ -63,7 +60,7 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
     
     if (UVMappingMode != FbxGeometryElement::eByControlPoint || normalMappingMode != FbxGeometryElement::eByControlPoint)
     {
-        std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex;
+        std::map<std::array<int, 2>, std::vector<std::array<int, 2>>> trianglesSharingVertex;
         int polyCount = mesh->GetPolygonCount();
 
         FbxVector4* meshPoints = mesh->GetControlPoints();
@@ -113,9 +110,9 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
                 auto found = trianglesSharingVertex.find(keyVertexAndUV);
                 if (found == trianglesSharingVertex.end())
                 {
-                    trianglesSharingVertex[keyVertexAndUV] = std::vector<int>();                
+                    trianglesSharingVertex[keyVertexAndUV] = std::vector<std::array<int, 2>>();                
                 }
-                trianglesSharingVertex[keyVertexAndUV].push_back(i);
+                trianglesSharingVertex[keyVertexAndUV].push_back({ i, j });
 
             }
             std::array<vertexWithBinormalAndTangent, 3>  newTriangle = GenerateBinormalsForTriangle(triangleVertices);
@@ -125,7 +122,7 @@ meshDescription processFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
             }
         }
 
-        GenerateBinormalForSharedVertex(mesh, trianglesSharingVertex);
+        //GenerateBinormalForSharedVertex(mesh, trianglesSharingVertex, textureIndex);
     }
     
     /// No need for a indexBuffer for this model as the vertices in the vertexBuffer map directly to the mesh's triangles vertices (one to one relationship)

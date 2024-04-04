@@ -52,6 +52,7 @@
     <ClCompile Include="..\src\Castle\BinormalSolver.cpp">
       <Filter>src\Castle</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Castle\MeshExtractor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\UnitTestResources\Scripts\TestBorderless.lua">
@@ -158,6 +159,9 @@
       <Filter>src\Castle\headers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Castle\BinormalSolver.h">
+      <Filter>src\Castle\headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Castle\MeshExtractor.h">
       <Filter>src\Castle\headers</Filter>
     </ClInclude>
   </ItemGroup>

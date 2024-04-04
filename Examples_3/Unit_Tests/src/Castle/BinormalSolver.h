@@ -19,6 +19,13 @@ struct vertexWithBinormalAndTangent
     float3 tangent;
 };
 
+struct meshDescription
+{
+    std::vector<int>                          indices;
+    std::vector<vertexWithBinormalAndTangent> vertices;
+};
+
 std::array<vertexWithBinormalAndTangent, 3> GenerateBinormalsForTriangle(std::array<vertexFormat, 3>);
 
-void GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex);
+meshDescription GenerateBinormalForSharedVertex(FbxMesh* mesh, std::map<std::array<int, 2>, std::vector<int>> trianglesSharingVertex,
+                                                int texIndex);

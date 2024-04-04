@@ -18,6 +18,7 @@
     <ClCompile Include="..\src\Castle\CmdRing.cpp" />
     <ClCompile Include="..\src\Castle\CmdRingElement.cpp" />
     <ClCompile Include="..\src\Castle\Command.cpp" />
+    <ClCompile Include="..\src\Castle\MeshExtractor.cpp" />
     <ClCompile Include="..\src\Castle\PipelineWrapper.cpp" />
     <ClCompile Include="..\src\Castle\QueueWrapper.cpp" />
     <ClCompile Include="..\src\Castle\RendererWrapper.cpp" />
@@ -45,6 +46,7 @@
     <ClInclude Include="..\src\Castle\Command.h" />
     <ClInclude Include="..\src\Castle\IAppCommand.h" />
     <ClInclude Include="..\src\Castle\IResourceSet.h" />
+    <ClInclude Include="..\src\Castle\MeshExtractor.h" />
     <ClInclude Include="..\src\Castle\PipelineWrapper.h" />
     <ClInclude Include="..\src\Castle\projections.h" />
     <ClInclude Include="..\src\Castle\QueueWrapper.h" />
