@@ -18,6 +18,7 @@ RES(SamplerState,  uSampler0, UPDATE_FREQ_NONE, s0, binding = 8);
 CBUFFER(uniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 0)
 {
     DATA(float4x4, mvp, None);
+    DATA(float4x4, invMVP, None);
     DATA(float4x4, modelView, None);
     DATA(float4x4, toWorld, None);
     DATA(float4x4, normalMat, None);
@@ -26,6 +27,7 @@ CBUFFER(uniformBlock, UPDATE_FREQ_PER_FRAME, b0, binding = 0)
     // Point Light Information
     DATA(float3, lightPosition, None);
     DATA(float3, lightColor, None);
+    DATA(float3, viewerPosition, None);
 };
 
 #endif

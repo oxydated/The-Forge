@@ -14,6 +14,7 @@
 struct UniformBlockCastle
 {
     CameraMatrix mProjectView;
+    CameraMatrix mInvProjectView;
     mat4         modelView;
     mat4         mToWorldMat;
     mat4         mNormalMat;
@@ -22,6 +23,7 @@ struct UniformBlockCastle
     // Point Light Information
     vec3 mLightPosition;
     vec3 mLightColor;
+    vec3 viewerPosition;
 };
 
 struct vertexFormat

@@ -23,7 +23,6 @@
 */
 
 // Shader for simple shading with a point light
-// for planets in Unit Test 12 - Transformations
 
 #include "resourcesCastle.h.fsl"
 
@@ -45,13 +44,13 @@ float4 PS_MAIN( VSOutput In )
 
     float3 lightPos = Get(lightPosition);
 
-    //float3 Normal = normalize(In.Normal);
-    //float3 binormal = normalize(In.binormal);
-    //float3 tangent = normalize(In.tangent);
+    float3 Normal = normalize(In.Normal);
+    float3 binormal = normalize(In.binormal);
+    float3 tangent = normalize(In.tangent);
 
-    float3 Normal = In.Normal;
-    float3 binormal = normalize(cross(In.Normal, In.tangent));
-    float3 tangent = normalize(cross(In.Normal, binormal));
+    //float3 Normal = In.Normal;
+    //float3 binormal = normalize(cross(In.Normal, In.tangent));
+    //float3 tangent = normalize(cross(In.Normal, binormal));
 
     float4 sampledColor = float4(0.0, 0.0, 0.0, 1.0); 
     float4 sampledBump = float4(0.0, 0.0, 0.0, 1.0); 
@@ -79,19 +78,39 @@ float4 PS_MAIN( VSOutput In )
         sampledBump = SampleTex2D(ExteriorBump, Get(uSampler0), In.TexCoord.xy);
     }
 
-    float3 bumpedNormal = normalize((2.0 * sampledBump.x - 1.0) *  binormal + (2.0 * sampledBump.y - 1.0) * tangent  - sampledBump.z * Normal);
+    float3 bumpedNormal = normalize((2.0 * sampledBump.x - 1.0) *  tangent + (2.0 * sampledBump.y - 1.0) *  binormal +  sampledBump.z * Normal);
 
-    float lightIntensity = saturate(dot(float3(0.0, 1.0, 0.0), bumpedNormal));
+    float ambientLightIntesity = 0.02;
+
+    //// diffuse reflection
 
     float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
-    float diffuselightIntensity = saturate(dot(LightVectorWorldSpace, bumpedNormal));
 
-    float ambientLightIntesity = 0.2;
     float lighIntensity = 0.8;
+
+    float diffuselightIntensity = lighIntensity * saturate(dot(LightVectorWorldSpace, bumpedNormal));
+
+    //// specular reflection
+
+    float shininess = 8.0;
+
+    float3 viewerWorldSpace = normalize(Get(viewerPosition) - In.WorldPosition);
+
+    float3 R = 2*(saturate(dot(LightVectorWorldSpace,bumpedNormal))) * bumpedNormal - saturate(LightVectorWorldSpace) ;
+    
+    float S = dot(R,viewerWorldSpace);
+
+    float specularIntensity = saturate(0.06 * pow(S, shininess));
+
+    //float specularIntensity = saturate(dot(bumpedNormal, viewerWorldSpace));
+
+    ////
 
     //float4 sampledColor = SampleTex2D(colorTex, Get(uSampler0), In.TexCoord.xy);
 
-    RETURN((sampledColor) * saturate(lighIntensity * diffuselightIntensity + ambientLightIntesity));
-    //RETURN((sampledColor*0.01) + (float4(bumpedNormal, 1.0) * 0.99 ));
-    //RETURN((sampledColor*0.01) + (sampledBump * 0.99 ));
+    RETURN(saturate( float4(1.0, 1.0, 1.0, 1.0) * specularIntensity + float4(0.0, 0.0, 0.5, 1.0) * diffuselightIntensity + float4(0.1, 0.0, 0.0, 1.0) * ambientLightIntesity));
+
+    //RETURN(float4(1.0, 1.0, 1.0, 1.0)*specularIntensity );
+
+    //RETURN(float4(bumpedNormal, 1.0));
 }

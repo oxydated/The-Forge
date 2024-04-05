@@ -343,20 +343,22 @@ void CastleObj::update(float deltaTime, ICameraController* cameraController) {
    
     // update camera with time
     mat4 viewMat = cameraController->getViewMatrix();
+    vec3 viewPos = cameraController->getViewPosition();
 
     const float  aspectInverse = (float)appHost->mSettings.mHeight / (float)appHost->mSettings.mWidth;
     const float  horizontal_fov = PI / 2.0f;
     CameraMatrix projMat = CameraMatrix::perspective(horizontal_fov, aspectInverse, 1000.0f, 0.1f);
     castleUniform.mProjectView = projMat * viewMat;
+    castleUniform.mInvProjectView = CameraMatrix::inverse(castleUniform.mProjectView);
 
     // point light parameters
 
-    float radius = 5000.0f;
+    float radius = 100.0f;
     float angle = 2 * PI * phase;
     float cx = radius * std::cosf(angle);
     float cy = radius * std::sinf(angle);
 
-    castleUniform.mLightPosition = vec3(cx, 0.0f, cy);
+    castleUniform.mLightPosition = vec3(cx, cy, 0.0f);
     castleUniform.mLightColor = vec3(0.9f, 0.9f, 0.7f); // Pale Yellow
 
     castleUniform.mColor = vec4(0.32f, 0.f, 0.32f, 1.0f);
@@ -364,6 +366,11 @@ void CastleObj::update(float deltaTime, ICameraController* cameraController) {
     castleUniform.mToWorldMat = mat4::identity();
 
     castleUniform.modelView = viewMat * castleUniform.mToWorldMat;
+
+    //vec4 viewPosTransformed = castleUniform.modelView * vec4(viewPos.getX(), viewPos.getY(), viewPos.getZ(), 1.0f);
+    //castleUniform.viewerPosition = viewPosTransformed.getXYZ();
+
+    castleUniform.viewerPosition = viewPos;
 
     mat3 upperMatrix = castleUniform.modelView.getUpper3x3();
 

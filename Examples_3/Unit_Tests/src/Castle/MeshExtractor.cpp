@@ -31,13 +31,13 @@ std::array<Vector3, 2> solveBinormal(FbxVector4 normal, std::pair<FbxVector2, Fb
     float p2z = (float)vert2.second[2];
 
     float u0 = (float)vert0.first[0];
-    float v0 = (float)vert0.first[1];
+    float v0 = 1.0f - (float)vert0.first[1];
 
     float u1 = (float)vert1.first[0];
-    float v1 = (float)vert1.first[1];
+    float v1 = 1.0f - (float)vert1.first[1];
 
     float u2 = (float)vert2.first[0];
-    float v2 = (float)vert2.first[1];
+    float v2 = 1.0f - (float)vert2.first[1];
 
     float px, py, pz;
     float x, y;
