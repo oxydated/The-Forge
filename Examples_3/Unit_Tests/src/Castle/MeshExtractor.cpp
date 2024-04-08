@@ -83,6 +83,10 @@ meshDescription extractFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
     FbxGeometryElement::EMappingMode   UVMappingMode = elementUV->GetMappingMode();
     FbxGeometryElement::EReferenceMode UVReferenceMode = elementUV->GetReferenceMode();
 
+    int elementTangentCount = mesh->GetElementTangentCount();
+
+    FbxGeometryElementTangent* elementTangent = mesh->GetElementTangent();
+
     /// In the case any of UVMappingMode or normalMapping mode is set to anything but eByControlPoint, each polygon vertex will be exported
     /// as an individual vertex in the mesh
     ///
@@ -136,10 +140,6 @@ meshDescription extractFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
             FbxVector4 Normal0;
             mesh->GetPolygonVertexNormal(trianglesForVertex[0][0], trianglesForVertex[0][1], Normal0);
 
-            //std::function < bool(std::pair<FbxVector2, FbxVector4> Vert0, std::pair<FbxVector2, FbxVector4> Vert1) const>
-            //                    compVertices = [UV0](std::pair<FbxVector2, FbxVector4> Vert0, std::pair<FbxVector2, FbxVector4> Vert1)->bool
-            //{ return angleFromUV(Vert0.first, UV0) < angleFromUV(Vert1.first, UV0); };
-
             class tCompVertices
             {
             public:
@@ -152,52 +152,30 @@ meshDescription extractFBXMesh(FbxMesh* mesh, uint32_t textureIndex)
                 FbxVector2 UV;
             } compVertices(UV0);
 
-            std::set<std::pair<FbxVector2, FbxVector4>, tCompVertices> adjacentVertices(compVertices);
-            for (auto& tri : trianglesForVertex)
-            {
-                int faceIndex = tri[0];
-                int vertexInFace0 = tri[1];
+            // std::set<std::pair<FbxVector2, FbxVector4>, tCompVertices> adjacentVertices(compVertices);
+            auto& tri = trianglesForVertex[0];
 
-                int vertexInFace1 = (tri[1] + 1) % 3;
-                int index1 = mesh->GetPolygonVertex(faceIndex, vertexInFace1);
-                FbxVector4 Pos1 = mesh->GetControlPointAt(index1);
-                FbxVector2 UV1;
-                mesh->GetPolygonVertexUV(faceIndex, vertexInFace1, UVSetName, UV1, unmapped);
-                adjacentVertices.insert({ UV1, Pos1 });
+            int faceIndex = tri[0];
+            int vertexInFace0 = tri[1];
 
-                int        vertexInFace2 = (tri[1] + 2) % 3;
-                int        index2 = mesh->GetPolygonVertex(faceIndex, vertexInFace2);
-                FbxVector4 Pos2 = mesh->GetControlPointAt(index2);
-                FbxVector2 UV2;
-                mesh->GetPolygonVertexUV(faceIndex, vertexInFace2, UVSetName, UV2, unmapped);
-                adjacentVertices.insert({ UV2, Pos2 });
-            }
+            int        vertexInFace1 = (tri[1] + 1) % 3;
+            int        index1 = mesh->GetPolygonVertex(faceIndex, vertexInFace1);
+            FbxVector4 Pos1 = mesh->GetControlPointAt(index1);
+            FbxVector2 UV1;
+            mesh->GetPolygonVertexUV(faceIndex, vertexInFace1, UVSetName, UV1, unmapped);
 
-            std::pair<FbxVector2, FbxVector4> vert0 = { UV0, Pos0 };
+            int        vertexInFace2 = (tri[1] + 2) % 3;
+            int        index2 = mesh->GetPolygonVertex(faceIndex, vertexInFace2);
+            FbxVector4 Pos2 = mesh->GetControlPointAt(index2);
+            FbxVector2 UV2;
+            mesh->GetPolygonVertexUV(faceIndex, vertexInFace2, UVSetName, UV2, unmapped);
+
+            // std::pair<FbxVector2, FbxVector4> vert0 = { UV0, Pos0 };
 
             std::array<Vector3, 2> TangentAndBinormal;
 
-            auto upperBound = adjacentVertices.upper_bound({ { 1.0, 0.0 }, {1.0, 0.0, 0.0, 1.0} });
-            if (upperBound == adjacentVertices.end())
-            {
-                auto vert1 = *(--upperBound);
-                auto vert2 = *(adjacentVertices.begin());
-                TangentAndBinormal = solveBinormal(Normal0, vert0, vert1, vert2);
-            }
-            else
-            {
-                auto vert2 = *upperBound;
-                if (upperBound == adjacentVertices.begin())
-                {
-                    auto vert1 = *(adjacentVertices.rbegin());
-                    TangentAndBinormal = solveBinormal(Normal0, vert0, vert1, vert2);
-                }
-                else
-                {
-                    auto vert1 = *(--upperBound);
-                    TangentAndBinormal = solveBinormal(Normal0, vert0, vert1, vert2);
-                }
-            }
+            TangentAndBinormal = solveBinormal(Normal0, { UV0, Pos0 }, { UV1, Pos1 }, { UV2, Pos2 });
+
             vertexWithBinormalAndTangent newVertexWithBinormal;
             newVertexWithBinormal.position = { (float)Pos0[0], (float)Pos0[1], (float)Pos0[2], 1.0f };
 

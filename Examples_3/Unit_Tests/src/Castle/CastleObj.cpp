@@ -221,7 +221,7 @@ CastleObj::CastleObj(IApp* app):
                                             { "Castle Exterior Texture.dds", "Exterior" },
                                             /*{ "Castle Interior Texture NormalMap.dds", "InteriorBump" },
                                             { "Castle Interior Texture.dds", "Interior" },*/
-                                            { "Castle Interior Texture_new_normalmap.dds", "InteriorBump" },
+                                            { "sphere_bump.dds", "InteriorBump" },
                                             { "Castle Interior Texture_new.dds", "Interior" },
                                             { "Ground and Fountain Texture Bump.dds", "FountainBump" },
                                             { "Ground and Fountain Texture.dds", "Fountain" },

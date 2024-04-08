@@ -78,7 +78,9 @@ float4 PS_MAIN( VSOutput In )
         sampledBump = SampleTex2D(ExteriorBump, Get(uSampler0), In.TexCoord.xy);
     }
 
-    float3 bumpedNormal = normalize((2.0 * sampledBump.x - 1.0) *  tangent + (2.0 * sampledBump.y - 1.0) *  binormal +  sampledBump.z * Normal);
+    float3 bumpedNormal = normalize(-(2.0 * sampledBump.x - 1.0) *  binormal - (2.0 * sampledBump.y - 1.0) *   tangent +   sampledBump.z  * Normal);
+
+    // float3 bumpedNormal = Normal;
 
     float ambientLightIntesity = 0.02;
 
@@ -86,9 +88,9 @@ float4 PS_MAIN( VSOutput In )
 
     float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
 
-    float lighIntensity = 0.8;
+    float diffuseIntensity = 0.3;
 
-    float diffuselightIntensity = lighIntensity * saturate(dot(LightVectorWorldSpace, bumpedNormal));
+    float diffuselightIntensity = diffuseIntensity * saturate(dot(LightVectorWorldSpace, bumpedNormal));
 
     //// specular reflection
 
@@ -96,11 +98,13 @@ float4 PS_MAIN( VSOutput In )
 
     float3 viewerWorldSpace = normalize(Get(viewerPosition) - In.WorldPosition);
 
-    float3 R = 2*(saturate(dot(LightVectorWorldSpace,bumpedNormal))) * bumpedNormal - saturate(LightVectorWorldSpace) ;
+    float3 R = 2*(dot(LightVectorWorldSpace,bumpedNormal)) * bumpedNormal - LightVectorWorldSpace ;
     
     float S = dot(R,viewerWorldSpace);
 
-    float specularIntensity = saturate(0.06 * pow(S, shininess));
+    float specularIntensity = 0.5;
+
+    float specularLightIntensity = saturate(specularIntensity * pow(S, shininess));
 
     //float specularIntensity = saturate(dot(bumpedNormal, viewerWorldSpace));
 
@@ -108,9 +112,18 @@ float4 PS_MAIN( VSOutput In )
 
     //float4 sampledColor = SampleTex2D(colorTex, Get(uSampler0), In.TexCoord.xy);
 
-    RETURN(saturate( float4(1.0, 1.0, 1.0, 1.0) * specularIntensity + float4(0.0, 0.0, 0.5, 1.0) * diffuselightIntensity + float4(0.1, 0.0, 0.0, 1.0) * ambientLightIntesity));
+    //// Phong light model
 
-    //RETURN(float4(1.0, 1.0, 1.0, 1.0)*specularIntensity );
+    float4 lightFinal = float4(0.0, 0.0, 0.0, 1.0);
 
-    //RETURN(float4(bumpedNormal, 1.0));
+    lightFinal += float4(1.0, 1.0, 1.0, 1.0) * ambientLightIntesity; 
+
+    lightFinal += float4(0.0, 0.0, 0.5, 1.0) * diffuselightIntensity;
+
+    lightFinal += float4(1.0, 1.0, 1.0, 1.0) * specularLightIntensity;
+
+    RETURN(saturate(lightFinal));
+
+
+    //RETURN(float4( (float3(1.0, 1.0, 1.0) + tangent ) /2.0, 1.0));
 }
