@@ -4,14 +4,21 @@
 #define RESOURCES_CASTLE_H
 
 // UPDATE_FREQ_NONE
-RES(Tex2D(float4), ExteriorBump, UPDATE_FREQ_NONE, t1, binding = 1);
-RES(Tex2D(float4), Exterior,  UPDATE_FREQ_NONE, t2, binding = 2);
-RES(Tex2D(float4), InteriorBump,   UPDATE_FREQ_NONE, t3, binding = 3);
-RES(Tex2D(float4), Interior,   UPDATE_FREQ_NONE, t4, binding = 4);
-RES(Tex2D(float4), FountainBump, UPDATE_FREQ_NONE, t5, binding = 5);
-RES(Tex2D(float4), Fountain,  UPDATE_FREQ_NONE, t6, binding = 6);
-RES(Tex2D(float4), Towers,  UPDATE_FREQ_NONE, t7, binding = 7);
-RES(SamplerState,  uSampler0, UPDATE_FREQ_NONE, s0, binding = 8);
+
+RES(Tex2D(float4), RightText, UPDATE_FREQ_NONE, t1, binding = 1);
+RES(Tex2D(float4), LeftText, UPDATE_FREQ_NONE, t2, binding = 2);
+RES(Tex2D(float4), TopText, UPDATE_FREQ_NONE, t3, binding = 3);
+RES(Tex2D(float4), BotText, UPDATE_FREQ_NONE, t4, binding = 4);
+RES(Tex2D(float4), FrontText, UPDATE_FREQ_NONE, t5, binding = 5);
+RES(Tex2D(float4), BackText, UPDATE_FREQ_NONE, t6, binding = 6);
+RES(Tex2D(float4), ExteriorBump, UPDATE_FREQ_NONE, t7, binding = 7);
+RES(Tex2D(float4), Exterior,  UPDATE_FREQ_NONE, t8, binding = 8);
+RES(Tex2D(float4), InteriorBump,   UPDATE_FREQ_NONE, t9, binding = 9);
+RES(Tex2D(float4), Interior,   UPDATE_FREQ_NONE, t10, binding = 10);
+RES(Tex2D(float4), FountainBump, UPDATE_FREQ_NONE, t11, binding = 11);
+RES(Tex2D(float4), Fountain,  UPDATE_FREQ_NONE, t12, binding = 12);
+RES(Tex2D(float4), Towers,  UPDATE_FREQ_NONE, t13, binding = 13);
+RES(SamplerState,  uSampler0, UPDATE_FREQ_NONE, s0, binding = 14);
 
 // UPDATE_FREQ_PER_FRAME
 

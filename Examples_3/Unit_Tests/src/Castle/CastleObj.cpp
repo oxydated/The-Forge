@@ -217,7 +217,13 @@ std::vector<FbxNode*> exploreFBXSceneTree(FbxScene* scene)
 }
 
 CastleObj::CastleObj(IApp* app):
-    appHost(app), CastleTextureParameters({ { "Castle Exterior Texture Bump.dds", "ExteriorBump" },
+    appHost(app), CastleTextureParameters({ { "posx.dds", "RightText" },
+                                            { "negx.dds", "LeftText" },
+                                            { "posy.dds", "TopText" },
+                                            { "negy.dds", "BotText" },
+                                            { "negz.dds", "FrontText" },
+                                            { "posz.dds", "BackText" },
+                                            { "Castle Exterior Texture Bump.dds", "ExteriorBump" },
                                             { "Castle Exterior Texture.dds", "Exterior" },
                                             /*{ "Castle Interior Texture NormalMap.dds", "InteriorBump" },
                                             { "Castle Interior Texture.dds", "Interior" },*/
@@ -227,7 +233,7 @@ CastleObj::CastleObj(IApp* app):
                                             { "Ground and Fountain Texture.dds", "Fountain" },
                                             { "Towers Doors and Windows Texture.dds", "Towers" } }),
     modelTextureDict(
-        { { "Castle_Interior", 0 }, { "Ground_and_Fountain", 1 }, { "Towers_Doors_and_Windows", 2 }, { "Castle_Exterior", 3 } })
+        { { "Sphere.002", 0 }, { "Ground_and_Fountain", 1 }, { "Towers_Doors_and_Windows", 2 }, { "Castle_Exterior", 3 } })
 {
     std::string fileName = "Meshes/castle.fbx";
 

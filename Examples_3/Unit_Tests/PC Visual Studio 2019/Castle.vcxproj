@@ -141,6 +141,8 @@ xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Castle*.dds" "$(O
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Ground*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\Towers*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\sphere_bump.dds" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\pos*.dds" "$(OutDir)Textures\"
+xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\neg*.dds" "$(OutDir)Textures\"
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Textures\dds\circlepad.tex" "$(OutDir)Textures\"
 
 xcopy /Y /S /D "$(ProjectDir)..\UnitTestResources\Meshes\castle.fbx" "$(OutDir)Meshes\"

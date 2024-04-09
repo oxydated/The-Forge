@@ -61,6 +61,7 @@ float4 PS_MAIN( VSOutput In )
     {
         sampledColor = SampleTex2D(Interior, Get(uSampler0), In.TexCoord.xy);
         sampledBump = SampleTex2D(InteriorBump, Get(uSampler0), In.TexCoord.xy);
+        //sampledBump = SampleTex2D(RightText, Get(uSampler0), In.TexCoord.xy);
     }
     else if(texIndex == 1)
     {
@@ -94,13 +95,13 @@ float4 PS_MAIN( VSOutput In )
 
     //// specular reflection
 
-    float shininess = 8.0;
+    float shininess = 50.0;
 
     float3 viewerWorldSpace = normalize(Get(viewerPosition) - In.WorldPosition);
 
     float3 R = 2*(dot(LightVectorWorldSpace,bumpedNormal)) * bumpedNormal - LightVectorWorldSpace ;
     
-    float S = dot(R,viewerWorldSpace);
+    float S = max(0.0, dot(R,viewerWorldSpace));
 
     float specularIntensity = 0.5;
 

@@ -26,12 +26,12 @@ SkyBoxObj::SkyBoxObj(IApp* app):
                       10.0f,  -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f, -10.0f, 4.0f,   -10.0f, -10.0f,
                       -10.0f, 4.0f,   -10.0f, -10.0f, 10.0f,  4.0f,   10.0f,  -10.0f, 10.0f,  4.0f,
                   }),
-    skyboxTextureParameters({ { "Skybox_right1.tex", "RightText" },
-                              { "Skybox_left2.tex", "LeftText" },
-                              { "Skybox_top3.tex", "TopText" },
-                              { "Skybox_bottom4.tex", "BotText" },
-                              { "Skybox_front5.tex", "FrontText" },
-                              { "Skybox_back6.tex", "BackText" } })
+    skyboxTextureParameters({ { "posx.dds", "RightText" },
+                              { "negx.dds", "LeftText" },
+                              { "posy.dds", "TopText" },
+                              { "negy.dds", "BotText" },
+                              { "posz.dds", "FrontText" },
+                              { "negz.dds", "BackText" } })
 {
 }
 
