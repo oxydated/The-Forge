@@ -1,9 +1,9 @@
 /*
  * Copyright (c) 2017-2024 The Forge Interactive Inc.
- * 
+ *
  * This file is part of The-Forge
  * (see https://github.com/ConfettiFX/The-Forge).
- * 
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -11,9 +11,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,6 +25,137 @@
 // Shader for simple shading with a point light
 
 #include "resourcesCastle.h.fsl"
+
+float4 cubeMapping( float3 v, float3 n )
+{
+	// Point3 normalWorld = scp.VectorToNoScale(normalVector, REF_WORLD);
+
+	// Point3 viewWorld = scp.VectorToNoScale(viewVector, REF_WORLD);
+
+	// float nx = normalWorld.x;
+	// float ny = normalWorld.y;
+	// float nz = normalWorld.z;
+
+	// float vx = viewWorld.x;
+	// float vy = viewWorld.y;
+	// float vz = viewWorld.z;
+
+
+
+	// float rx = vx - 2 * nx * (nx * vx + ny * vy + nz * vz);
+	// float ry = vy - 2 * ny * (nx * vx + ny * vy + nz * vz);
+	// float rz = vz - 2 * nz * (nx * vx + ny * vy + nz * vz);
+
+	float3 r =  v - 2 * n * dot(n, v);
+
+
+	////////////////////////////////////////////////////////////////////////////////
+	// float u, v;
+	// float uOff, vOff;
+
+	float2 uv;
+	float2 uvOff;
+
+	float4 cubeColor;
+
+	if (r.x > r.y && r.x >= -r.y && r.x > r.z && r.x >= -r.z) {
+		//rx=1
+
+		uv = float2(r.z / r.x, r.y / r.x);
+		uvOff = float2(2., 1.);
+
+		cubeColor = SampleTex2D(RightText, Get(uSampler0), (-uv + float2(1., 1.)) / 2.);
+
+		// v = r.z / r.x;
+		// u = r.y / r.x;
+		// uOff = 2.;
+		// vOff = 1.;
+	}
+
+	if (-r.x >= r.y && -r.x > -r.y && -r.x >= r.z && -r.x > -r.z) {
+
+		//rx=- 1
+		uv = float2(-(r.z / r.x), (r.y / r.x));
+		uvOff = float2( 0., 1.);
+
+		cubeColor = SampleTex2D(LeftText, Get(uSampler0), (uv + float2(1., 1.)) / 2.);
+
+		// v = -(r.z / r.x);
+		// u = (r.y / r.x);
+		// uOff = 0.;
+		// vOff = 1.;
+	}
+
+	if (r.y >= r.x && r.y > -r.x && r.y >= r.z && r.y > -r.z) {
+		//ry=1
+		uv = float2(r.x / r.y, r.z / r.y);
+		uvOff = float2( 3., 1.);
+
+		cubeColor = SampleTex2D(TopText, Get(uSampler0), (uv + float2(1., 1.)) / 2.);
+
+		// u = -r.x / r.y;
+		// v = r.z / r.y;
+		// uOff = 3.;
+		// vOff = 1.;
+	}
+
+	if (-r.y > r.x && -r.y >= -r.x && -r.y > r.z && -r.y >= -r.z) {
+
+		//ry=- 1
+		uv = float2(-(r.x / r.y), (r.z / r.y));
+		uvOff = float2( 1., 1.);
+
+		cubeColor = SampleTex2D(BotText, Get(uSampler0), (uv + float2(1., 1.)) / 2.);
+
+		// u = -(r.x / r.y);
+		// v = -(r.z / r.y);
+		// uOff = 1.;
+		// vOff = 1.;
+	}
+
+	if (r.z >= r.x && r.z > -r.x && r.z > r.y && r.z >= -r.y) {
+
+		//rz=1
+		uv = float2(r.x / r.z, - r.y / r.z);
+		uvOff = float2(1., 2.);
+
+		cubeColor = SampleTex2D(BackText, Get(uSampler0), (uv + float2(1., 1.)) / 2.);
+
+		// u = r.x / r.z;
+		// v = r.y / r.z;
+		// uOff = 1.;
+		// vOff = 2.;
+	}
+
+	if (-r.z > r.x && -r.z >= -r.x && -r.z >= r.y && -r.z > -r.y) {
+
+		//rz=- 1
+		uv = float2((r.x / r.z), (r.y / r.z));
+		uvOff = float2( 1., 0.);
+
+		cubeColor = SampleTex2D(FrontText, Get(uSampler0), (uv + float2(1., 1.)) / 2.);
+
+		// u = -(r.x / r.z);
+		// v = (r.y / r.z);
+		// uOff = 1.;
+		// vOff = 0.;
+	}
+
+	// Point3 oUVW;
+	// float toClamp = 0.0;
+
+	// toClamp = (float)(u + 1) / 2;
+	// oUVW.x = (1. / 4.) * ((toClamp > 0.99 ? 0.99 : (toClamp < 0.0 ? 0.0 : toClamp)) + uOff);
+
+	// toClamp = (float)(v + 1) / 2;
+	// oUVW.y = (1. / 3.) * ((toClamp > 0.99 ? 0.99 : (toClamp < 0.0 ? 0.0 : toClamp)) + vOff);
+	// oUVW.z = 0.0f;
+
+	// scp.SetUVW(oUVW);
+	// retval = mpCubeMap->EvalColor(scp);
+
+	return cubeColor;
+}
 
 STRUCT(VSOutput)
 {
@@ -52,9 +183,9 @@ float4 PS_MAIN( VSOutput In )
     //float3 binormal = normalize(cross(In.Normal, In.tangent));
     //float3 tangent = normalize(cross(In.Normal, binormal));
 
-    float4 sampledColor = float4(0.0, 0.0, 0.0, 1.0); 
-    float4 sampledBump = float4(0.0, 0.0, 0.0, 1.0); 
-    
+    float4 sampledColor = float4(0.0, 0.0, 0.0, 1.0);
+    float4 sampledBump = float4(0.0, 0.0, 0.0, 1.0);
+
     int texIndex = int(round(In.TexCoord.z));
 
     if(texIndex == 0)
@@ -100,7 +231,7 @@ float4 PS_MAIN( VSOutput In )
     float3 viewerWorldSpace = normalize(Get(viewerPosition) - In.WorldPosition);
 
     float3 R = 2*(dot(LightVectorWorldSpace,bumpedNormal)) * bumpedNormal - LightVectorWorldSpace ;
-    
+
     float S = max(0.0, dot(R,viewerWorldSpace));
 
     float specularIntensity = 0.5;
@@ -113,17 +244,22 @@ float4 PS_MAIN( VSOutput In )
 
     //float4 sampledColor = SampleTex2D(colorTex, Get(uSampler0), In.TexCoord.xy);
 
+	//// Cube Mapping
+
+	float4 cubeColor = cubeMapping( -viewerWorldSpace, bumpedNormal);
+
     //// Phong light model
 
     float4 lightFinal = float4(0.0, 0.0, 0.0, 1.0);
 
-    lightFinal += float4(1.0, 1.0, 1.0, 1.0) * ambientLightIntesity; 
+    lightFinal += (0.45* float4(0.25, 0.25, 0.25, 1.0) + 0.55 * cubeColor ) * ambientLightIntesity;
 
-    lightFinal += float4(0.0, 0.0, 0.5, 1.0) * diffuselightIntensity;
+    lightFinal += (0.45 * float4(0.9, 0.0, 0.8, 1.0) + 0.55 * cubeColor ) * diffuselightIntensity;
 
     lightFinal += float4(1.0, 1.0, 1.0, 1.0) * specularLightIntensity;
 
-    RETURN(saturate(lightFinal));
+    
+	RETURN(saturate(lightFinal));
 
 
     //RETURN(float4( (float3(1.0, 1.0, 1.0) + tangent ) /2.0, 1.0));
