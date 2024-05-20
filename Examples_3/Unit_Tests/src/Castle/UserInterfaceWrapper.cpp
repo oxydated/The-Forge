@@ -69,8 +69,8 @@ void UserInterfaceWrapper::UpdateUI(float deltaTime, IApp* app)
 bool UserInterfaceWrapper::CameraSetup(IApp* app)
 {
     // Initialize camera controller
-    CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f };
-    vec3                   camPos{ 48.0f, 48.0f, 20.0f };
+    CameraMotionParameters cmp{ 160.0f, 600.0f, 200.0f, 0.25f, 0.25f };
+    vec3                   camPos{ 5.0f, 5.0f, 5.0f };
     vec3                   lookAt{ vec3(0) };
 
     cameraController = initFpsCameraController(camPos, lookAt);

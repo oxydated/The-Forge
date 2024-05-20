@@ -217,12 +217,12 @@ std::vector<FbxNode*> exploreFBXSceneTree(FbxScene* scene)
 }
 
 CastleObj::CastleObj(IApp* app):
-    appHost(app), CastleTextureParameters({ { "posx.dds", "RightText" },
-                                            { "negx.dds", "LeftText" },
-                                            { "posy.dds", "TopText" },
-                                            { "negy.dds", "BotText" },
-                                            { "negz.dds", "FrontText" },
-                                            { "posz.dds", "BackText" },
+    appHost(app), CastleTextureParameters({ { "pos_gauss_x.dds", "RightText" },
+                                            { "neg_gauss_x.dds", "LeftText" },
+                                            { "pos_gauss_y.dds", "TopText" },
+                                            { "neg_gauss_y.dds", "BotText" },
+                                            { "neg_gauss_z.dds", "FrontText" },
+                                            { "pos_gauss_z.dds", "BackText" },
                                             { "Castle Exterior Texture Bump.dds", "ExteriorBump" },
                                             { "Castle Exterior Texture.dds", "Exterior" },
                                             /*{ "Castle Interior Texture NormalMap.dds", "InteriorBump" },

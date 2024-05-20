@@ -214,13 +214,13 @@ float4 PS_MAIN( VSOutput In )
 
     // float3 bumpedNormal = Normal;
 
-    float ambientLightIntesity = 0.02;
+    float ambientLightIntesity = 0.4;
 
     //// diffuse reflection
 
     float3 LightVectorWorldSpace = normalize(Get(lightPosition) - In.WorldPosition);
 
-    float diffuseIntensity = 0.3;
+    float diffuseIntensity = 0.7;
 
     float diffuselightIntensity = diffuseIntensity * saturate(dot(LightVectorWorldSpace, bumpedNormal));
 
@@ -234,7 +234,7 @@ float4 PS_MAIN( VSOutput In )
 
     float S = max(0.0, dot(R,viewerWorldSpace));
 
-    float specularIntensity = 0.5;
+    float specularIntensity = 1.0;
 
     float specularLightIntensity = saturate(specularIntensity * pow(S, shininess));
 
@@ -252,9 +252,9 @@ float4 PS_MAIN( VSOutput In )
 
     float4 lightFinal = float4(0.0, 0.0, 0.0, 1.0);
 
-    lightFinal += (0.45* float4(0.25, 0.25, 0.25, 1.0) + 0.55 * cubeColor ) * ambientLightIntesity;
+    lightFinal += (0.15 * float4(0.95, 0.95, 1.0, 1.0) + 0.85 * cubeColor ) * ambientLightIntesity;
 
-    lightFinal += (0.45 * float4(0.9, 0.0, 0.8, 1.0) + 0.55 * cubeColor ) * diffuselightIntensity;
+    lightFinal += (0.15 * float4(0.95, 0.95, 1.0, 1.0) + 0.85 * cubeColor ) * diffuselightIntensity;
 
     lightFinal += float4(1.0, 1.0, 1.0, 1.0) * specularLightIntensity;
 
